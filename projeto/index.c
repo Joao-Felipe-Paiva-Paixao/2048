@@ -4,6 +4,7 @@
 int main()
 {
     char escolha, confirmacao;
+    int ajudaOk;
 
     do
     {
@@ -47,7 +48,12 @@ int main()
             break;
         case 'a':
         case 'A':
-            printf("Chegou\n");
+            do
+            {
+                ajudaOk = imprimeAjuda(ajudaOk);
+            } while (ajudaOk != 1);
+            limpar_buffer();
+
             break;
         default:
             if (escolha != '`')
