@@ -28,7 +28,7 @@ int main()
             break;
         case 'n':
         case 'N':
-            printf("Chegou\n");
+            imprimeTabuleiro();
             break;
         case 'j':
         case 'J':

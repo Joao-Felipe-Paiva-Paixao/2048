@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include "2048.h" //Incluindo declarações das funções
 
+#define TAM_MATRIZ 4
+#define TAM_CELULA 6
+
 void limpar_buffer()
 {
     int ch;
@@ -31,4 +34,74 @@ int imprimeAjuda(int ajudaOk) // imprime o texto de ajuda no terminal
     printf("\nDigite [1] pra voltar ao menu: ");
     scanf("%d", &ajudaOk);
     return ajudaOk;
+}
+
+void imprimeTabuleiro()
+{
+    int t[TAM_MATRIZ][TAM_MATRIZ]; // cria a matriz
+
+    for (int i = 0; i < TAM_MATRIZ; i++) // inicializa a matriz
+    {
+        for (int j = 0; j < TAM_MATRIZ; j++)
+            t[i][j] = 2;
+    }
+    t[0][0] = 16;
+    t[1][0] = 128;
+    t[2][0] = 1024;
+
+    printf("┏"); // parte de cima
+    for (int i = 0; i < TAM_MATRIZ; i++)
+    {
+        for (int j = 0; j < TAM_CELULA; j++)
+        {
+            printf("━");
+        }
+        if (i < TAM_MATRIZ - 1) // imprime uma junta se não for o fim da linha
+        {
+            printf("┳");
+        }
+    }
+    printf("┓\n");
+
+    for (int i = 0; i < TAM_MATRIZ; i++) // imprime as linhas do meio
+    {
+        printf("┃");
+        for (int j = 0; j < TAM_MATRIZ; j++)
+        {
+            printf(" %*d ", TAM_CELULA - 2, t[i][j]); // o código < %*d > usa o argumento < TAM_CELULA - 2 > como tamanho da célula
+            printf("┃");
+        }
+        printf("\n");
+
+        if (i < TAM_MATRIZ - 1) // verifica se a linha do meio deve ser impressa
+        {
+            printf("┣");
+            for (int j = 0; j < TAM_MATRIZ; j++)
+            {
+                for (int k = 0; k < TAM_CELULA; k++)
+                {
+                    printf("━");
+                }
+                if (j < TAM_MATRIZ - 1) // verifica se a separação de celula deve ser escrita
+                {
+                    printf("╋");
+                }
+            }
+            printf("┫\n");
+        }
+    }
+
+    printf("┗"); // imprime a parte de baixo
+    for (int i = 0; i < TAM_MATRIZ; i++)
+    {
+        for (int j = 0; j < TAM_CELULA; j++)
+        {
+            printf("━");
+        }
+        if (i < TAM_MATRIZ - 1)
+        {
+            printf("┻");
+        }
+    }
+    printf("┛\n");
 }
