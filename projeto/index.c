@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include "2048.h" // Incluindo biblioteca do jogo
 
 int main()
@@ -8,9 +7,8 @@ int main()
 
     do
     {
-        imprimeMenu();
+        imprimeMenu();         // imprime o menu de decisão
         scanf("%c", &escolha); // recebe decisão do usuário
-
         limpar_buffer();
 
         switch (escolha)
@@ -26,9 +24,12 @@ int main()
                 escolha = '`';
 
             break;
-        case 'n':
+        case 'n': // cria um novo jogo
         case 'N':
-            imprimeTabuleiro();
+            int tamanho = tamanhoTabuleiro();
+            int **matriz = criaMatriz(tamanho);
+            imprimeTabuleiro(tamanho, matriz);
+            liberaMatriz(matriz, tamanho);
             break;
         case 'j':
         case 'J':

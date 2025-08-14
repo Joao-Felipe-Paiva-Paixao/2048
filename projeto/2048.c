@@ -1,7 +1,5 @@
-#include <stdio.h>
 #include "2048.h" //Incluindo declarações das funções
 
-#define TAM_MATRIZ 4
 #define TAM_CELULA 6
 
 void limpar_buffer()
@@ -14,13 +12,13 @@ void limpar_buffer()
 void imprimeMenu() // imprime o menu no terminal
 {
     printf("-----------MENU-----------\n");
-    printf("(R) Sair\n");
     printf("(N) Novo jogo\n");
     printf("(J) Continuar o jogo atual\n");
     printf("(C) Carregar um jogo salvo\n");
     printf("(S) Salvar o jogo atual\n");
     printf("(M) Mostrar Ranking\n");
     printf("(A) Ajuda com as instruções de como jogar\n");
+    printf("(R) Sair\n");
 
     printf("\nDigite a sua resposta: ");
 }
@@ -36,53 +34,50 @@ int imprimeAjuda(int ajudaOk) // imprime o texto de ajuda no terminal
     return ajudaOk;
 }
 
-void imprimeTabuleiro()
+void imprimeTabuleiro(int n, int **matriz) // imprime o tabuleiro do jogo
 {
-    int t[TAM_MATRIZ][TAM_MATRIZ]; // cria a matriz
-
-    for (int i = 0; i < TAM_MATRIZ; i++) // inicializa a matriz
+    for (int i = 0; i < n; i++) // inicializa matriz
     {
-        for (int j = 0; j < TAM_MATRIZ; j++)
-            t[i][j] = 2;
+        for (int j = 0; j < n; j++)
+        {
+            matriz[i][j] = 0;
+        }
     }
-    t[0][0] = 16;
-    t[1][0] = 128;
-    t[2][0] = 1024;
 
     printf("┏"); // parte de cima
-    for (int i = 0; i < TAM_MATRIZ; i++)
+    for (int i = 0; i < n; i++)
     {
         for (int j = 0; j < TAM_CELULA; j++)
         {
             printf("━");
         }
-        if (i < TAM_MATRIZ - 1) // imprime uma junta se não for o fim da linha
+        if (i < n - 1) // imprime uma junta se não for o fim da linha
         {
             printf("┳");
         }
     }
     printf("┓\n");
 
-    for (int i = 0; i < TAM_MATRIZ; i++) // imprime as linhas do meio
+    for (int i = 0; i < n; i++) // imprime as linhas do meio
     {
         printf("┃");
-        for (int j = 0; j < TAM_MATRIZ; j++)
+        for (int j = 0; j < n; j++)
         {
-            printf(" %*d ", TAM_CELULA - 2, t[i][j]); // o código < %*d > usa o argumento < TAM_CELULA - 2 > como tamanho da célula
+            printf(" %*d ", TAM_CELULA - 2, matriz[i][j]); // o código < %*d > usa o argumento < TAM_CELULA - 2 > como tamanho da célula
             printf("┃");
         }
         printf("\n");
 
-        if (i < TAM_MATRIZ - 1) // verifica se a linha do meio deve ser impressa
+        if (i < n - 1) // verifica se a linha do meio deve ser impressa
         {
             printf("┣");
-            for (int j = 0; j < TAM_MATRIZ; j++)
+            for (int j = 0; j < n; j++)
             {
                 for (int k = 0; k < TAM_CELULA; k++)
                 {
                     printf("━");
                 }
-                if (j < TAM_MATRIZ - 1) // verifica se a separação de celula deve ser escrita
+                if (j < n - 1) // verifica se a separação de celula deve ser escrita
                 {
                     printf("╋");
                 }
@@ -92,16 +87,58 @@ void imprimeTabuleiro()
     }
 
     printf("┗"); // imprime a parte de baixo
-    for (int i = 0; i < TAM_MATRIZ; i++)
+    for (int i = 0; i < n; i++)
     {
         for (int j = 0; j < TAM_CELULA; j++)
         {
             printf("━");
         }
-        if (i < TAM_MATRIZ - 1)
+        if (i < n - 1)
         {
             printf("┻");
         }
     }
     printf("┛\n");
+}
+
+int tamanhoTabuleiro() // decide o tamanho do tabuleiro
+{
+    int n, ok = 0;
+    printf("Digite o tamanho do tabuleiro:\n- [4] Jogo padrão 4x4\n- [5] Jogo 5x5\n- [6] Jogo 6x6\nResposta: ");
+    scanf("%d", &n);
+    limpar_buffer();
+
+    do
+    {
+        if (n > 6 || n < 4)
+        {
+            printf("Valor inválido, digite novamente: ");
+            scanf("%d", &n);
+            limpar_buffer();
+            ok = 0;
+        }
+        else
+            ok = 1;
+
+    } while (ok != 1);
+
+    return n;
+}
+
+int **criaMatriz(int n)
+{
+    int **matriz;
+    matriz = malloc(n * sizeof(int *));
+    for (int i = 0; i < n; i++)
+    {
+        matriz[i] = malloc(n * sizeof(int));
+    }
+    return matriz;
+}
+
+void liberaMatriz(int **matriz, int n)
+{
+    for (int i = 0; i < n; i++)
+        free(matriz[i]);
+    free(matriz);
 }
