@@ -34,7 +34,7 @@ int imprimeAjuda(int ajudaOk) // imprime o texto de ajuda no terminal
     return ajudaOk;
 }
 
-int tamanhoCelula(int n, int **matriz)
+int tamanhoCelula(int n, int **matriz) // define tamanho da célula
 {
     int maior = matriz[0][0], count = 0;
     for (int i = 0; i < n; i++)
@@ -62,16 +62,20 @@ int tamanhoCelula(int n, int **matriz)
     return count;
 }
 
-void imprimeTabuleiro(int n, int **matriz) // imprime o tabuleiro do jogo
+int **inicializaMatriz(int n, int **matriz) // inicializa matriz
 {
-    char espaço = ' ';
-    for (int i = 0; i < n; i++) // inicializa matriz
+    for (int i = 0; i < n; i++)
     {
         for (int j = 0; j < n; j++)
         {
             matriz[i][j] = 0;
         }
     }
+}
+
+void imprimeTabuleiro(int n, int **matriz) // imprime o tabuleiro do jogo
+{
+    char espaço = ' ';
 
     int tamanhoDaCelula = tamanhoCelula(n, matriz);
 
@@ -169,6 +173,9 @@ int **criaMatriz(int n)
     {
         matriz[i] = malloc(n * sizeof(int));
     }
+
+    inicializaMatriz(n, matriz);
+
     return matriz;
 }
 
@@ -177,4 +184,39 @@ void liberaMatriz(int **matriz, int n)
     for (int i = 0; i < n; i++)
         free(matriz[i]);
     free(matriz);
+}
+
+void novoNumeroAleatorio(int n, int **matriz)
+{
+    srand(time(NULL));
+
+    int i, j;               // coordenadas da matriz
+    int probabilidade, nro; // define a probabilidade de a nova peça ser um 4;
+    do
+    {
+        i = rand() % n;
+        j = rand() % n;
+    } while (matriz[i][j] != 0);
+
+    switch (n)
+    {
+    case 4:
+        probabilidade = 10;
+        break;
+    case 5:
+        probabilidade = 15;
+        break;
+    case 6:
+        probabilidade = 20;
+        break;
+    }
+
+    nro = (rand() % 100) + 1;
+
+    if (nro < probabilidade)
+    {
+        matriz[i][j] = 4;
+    }
+    else
+        matriz[i][j] = 2;
 }

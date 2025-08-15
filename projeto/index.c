@@ -28,6 +28,7 @@ int main()
         case 'N':
             int tamanho = tamanhoTabuleiro();
             int **matriz = criaMatriz(tamanho);
+            novoNumeroAleatorio(tamanho, matriz);
             imprimeTabuleiro(tamanho, matriz);
             liberaMatriz(matriz, tamanho);
             break;
