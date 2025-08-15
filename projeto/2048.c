@@ -34,8 +34,37 @@ int imprimeAjuda(int ajudaOk) // imprime o texto de ajuda no terminal
     return ajudaOk;
 }
 
+int tamanhoCelula(int n, int **matriz)
+{
+    int maior = matriz[0][0], count = 0;
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            if (matriz[i][j] > maior)
+            {
+                maior = matriz[i][j];
+            }
+        }
+    }
+
+    if (maior == 0)
+    {
+        return 1;
+    }
+
+    while (maior > 0)
+    {
+        maior = maior / 10;
+        count++;
+    }
+
+    return count;
+}
+
 void imprimeTabuleiro(int n, int **matriz) // imprime o tabuleiro do jogo
 {
+    char espaço = ' ';
     for (int i = 0; i < n; i++) // inicializa matriz
     {
         for (int j = 0; j < n; j++)
@@ -44,10 +73,12 @@ void imprimeTabuleiro(int n, int **matriz) // imprime o tabuleiro do jogo
         }
     }
 
+    int tamanhoDaCelula = tamanhoCelula(n, matriz);
+
     printf("┏"); // parte de cima
     for (int i = 0; i < n; i++)
     {
-        for (int j = 0; j < TAM_CELULA; j++)
+        for (int j = 0; j < tamanhoDaCelula + 2; j++)
         {
             printf("━");
         }
@@ -63,7 +94,12 @@ void imprimeTabuleiro(int n, int **matriz) // imprime o tabuleiro do jogo
         printf("┃");
         for (int j = 0; j < n; j++)
         {
-            printf(" %*d ", TAM_CELULA - 2, matriz[i][j]); // o código < %*d > usa o argumento < TAM_CELULA - 2 > como tamanho da célula
+            if (matriz[i][j] == 0)
+            {
+                printf(" %*c ", tamanhoDaCelula, espaço);
+            }
+            else
+                printf(" %*d ", tamanhoDaCelula, matriz[i][j]); // o código < %*d > usa o argumento < tamanhoDaCelula - 2 > como tamanho da célula
             printf("┃");
         }
         printf("\n");
@@ -73,7 +109,7 @@ void imprimeTabuleiro(int n, int **matriz) // imprime o tabuleiro do jogo
             printf("┣");
             for (int j = 0; j < n; j++)
             {
-                for (int k = 0; k < TAM_CELULA; k++)
+                for (int k = 0; k < tamanhoDaCelula + 2; k++)
                 {
                     printf("━");
                 }
@@ -89,7 +125,7 @@ void imprimeTabuleiro(int n, int **matriz) // imprime o tabuleiro do jogo
     printf("┗"); // imprime a parte de baixo
     for (int i = 0; i < n; i++)
     {
-        for (int j = 0; j < TAM_CELULA; j++)
+        for (int j = 0; j < tamanhoDaCelula + 2; j++)
         {
             printf("━");
         }

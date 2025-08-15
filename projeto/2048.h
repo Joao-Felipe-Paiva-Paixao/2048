@@ -13,5 +13,6 @@ void imprimeTabuleiro(int n, int **matriz); // imprime o tabuleiro do jogo
 int tamanhoTabuleiro();                     // decide o tamanho do tabuleiro
 int **criaMatriz(int n);                    // cria uma matriz com alocação dinamica
 void liberaMatriz(int **matriz, int n);     // libera uma matriz criada em alocação dinamica
+int tamanhoCelula(int n, int **matriz);
 
 #endif
