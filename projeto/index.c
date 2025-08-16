@@ -15,6 +15,7 @@ int main()
         {
         case 'r': // o programa deve encerrar
         case 'R':
+        {
             printf("Deseja mesmo sair?(Digite [S] ou [N]):");
             scanf("%c", &confirmacao);
             limpar_buffer();
@@ -24,12 +25,27 @@ int main()
                 escolha = '`';
 
             break;
+        }
         case 'n': // cria um novo jogo
         case 'N':
             int tamanho = tamanhoTabuleiro();
             int **matriz = criaMatriz(tamanho);
+            char jogada;
+
             novoNumeroAleatorio(tamanho, matriz);
-            imprimeTabuleiro(tamanho, matriz);
+            do
+            {
+                novoNumeroAleatorio(tamanho, matriz);
+                imprimeTabuleiro(tamanho, matriz);
+                printf("Jogada: ");
+                scanf("%c", &jogada);
+                limpar_buffer();
+                movimentação(tamanho, matriz);
+
+                if (jogada == 'u')
+                    break;
+            } while (1 < 2);
+
             liberaMatriz(matriz, tamanho);
             break;
         case 'j':

@@ -1,7 +1,5 @@
 #include "2048.h" //Incluindo declarações das funções
 
-#define TAM_CELULA 6
-
 void limpar_buffer()
 {
     int ch;
@@ -60,6 +58,30 @@ int tamanhoCelula(int n, int **matriz) // define tamanho da célula
     }
 
     return count;
+}
+
+int tamanhoTabuleiro() // decide o tamanho do tabuleiro
+{
+    int n, ok = 0;
+    printf("Digite o tamanho do tabuleiro:\n- [4] Jogo padrão 4x4\n- [5] Jogo 5x5\n- [6] Jogo 6x6\nResposta: ");
+    scanf("%d", &n);
+    limpar_buffer();
+
+    do
+    {
+        if (n > 6 || n < 4)
+        {
+            printf("Valor inválido, digite novamente: ");
+            scanf("%d", &n);
+            limpar_buffer();
+            ok = 0;
+        }
+        else
+            ok = 1;
+
+    } while (ok != 1);
+
+    return n;
 }
 
 int **inicializaMatriz(int n, int **matriz) // inicializa matriz
@@ -141,30 +163,6 @@ void imprimeTabuleiro(int n, int **matriz) // imprime o tabuleiro do jogo
     printf("┛\n");
 }
 
-int tamanhoTabuleiro() // decide o tamanho do tabuleiro
-{
-    int n, ok = 0;
-    printf("Digite o tamanho do tabuleiro:\n- [4] Jogo padrão 4x4\n- [5] Jogo 5x5\n- [6] Jogo 6x6\nResposta: ");
-    scanf("%d", &n);
-    limpar_buffer();
-
-    do
-    {
-        if (n > 6 || n < 4)
-        {
-            printf("Valor inválido, digite novamente: ");
-            scanf("%d", &n);
-            limpar_buffer();
-            ok = 0;
-        }
-        else
-            ok = 1;
-
-    } while (ok != 1);
-
-    return n;
-}
-
 int **criaMatriz(int n)
 {
     int **matriz;
@@ -219,4 +217,40 @@ void novoNumeroAleatorio(int n, int **matriz)
     }
     else
         matriz[i][j] = 2;
+}
+
+void movimentação(int n, int **matriz)
+{
+    int moveu;
+    int **matrizAux = criaMatriz(n);
+    do
+    {
+        moveu = 0;
+
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = 1; j < n; j++)
+            {
+                if (matriz[i][j] != 0 && matriz[i][j - 1] == 0)
+                {
+                    matriz[i][j - 1] = matriz[i][j];
+                    matriz[i][j] = 0;
+
+                    moveu = 1;
+                }
+                else if (matriz[i][j] != 0 && matriz[i][j - 1] == matriz[i][j] && matrizAux[i][j - 1] == 0 && matrizAux[i][j] == 0)
+                {
+                    matriz[i][j - 1] = (matriz[i][j]) * 2;
+                    matriz[i][j] = 0;
+
+                    matrizAux[i][j - 1] = 1;
+
+                    moveu = 1;
+                }
+            }
+        }
+
+    } while (moveu);
+
+    liberaMatriz(matrizAux, n);
 }
