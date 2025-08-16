@@ -28,6 +28,7 @@ int main()
         }
         case 'n': // cria um novo jogo
         case 'N':
+        {
             int tamanho = tamanhoTabuleiro();
             int **matriz = criaMatriz(tamanho);
             char jogada;
@@ -48,6 +49,7 @@ int main()
 
             liberaMatriz(matriz, tamanho);
             break;
+        }
         case 'j':
         case 'J':
             printf("Chegou\n");
@@ -65,7 +67,8 @@ int main()
             printf("Chegou\n");
             break;
         case 'a':
-        case 'A':
+        case 'A': // mostra o texto de ajuda
+        {
             do
             {
                 ajudaOk = imprimeAjuda(ajudaOk);
@@ -77,6 +80,7 @@ int main()
             if (escolha != '`')
                 printf("Resposta inválida!! tente novamente\n\n");
             break;
+        }
         }
     } while (escolha != 'r' && escolha != 'R');
 

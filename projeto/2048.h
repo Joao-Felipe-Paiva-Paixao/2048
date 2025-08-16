@@ -16,6 +16,6 @@ void liberaMatriz(int **matriz, int n);        // libera uma matriz criada em al
 int tamanhoCelula(int n, int **matriz);        // define tamanho da célula
 int **inicializaMatriz(int n, int **matriz);   // inicializa matriz
 void novoNumeroAleatorio(int n, int **matriz); // gera um número aleatório em uma célula vazia da matriz
-void movimentação(int n, int **matriz);
+void movimentação(int n, int **matriz);        // movimenta as peças no tabuleiro
 
 #endif

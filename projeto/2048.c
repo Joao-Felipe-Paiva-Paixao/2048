@@ -1,6 +1,6 @@
 #include "2048.h" //Incluindo declarações das funções
 
-void limpar_buffer()
+void limpar_buffer() // limpa o buffer
 {
     int ch;
     while ((ch = getchar()) != '\n' && ch != EOF)
@@ -163,7 +163,7 @@ void imprimeTabuleiro(int n, int **matriz) // imprime o tabuleiro do jogo
     printf("┛\n");
 }
 
-int **criaMatriz(int n)
+int **criaMatriz(int n) // cria matriz com alocação dinâmica
 {
     int **matriz;
     matriz = malloc(n * sizeof(int *));
@@ -177,26 +177,26 @@ int **criaMatriz(int n)
     return matriz;
 }
 
-void liberaMatriz(int **matriz, int n)
+void liberaMatriz(int **matriz, int n) // libera uma matriz criada em alocacção dinâmica
 {
     for (int i = 0; i < n; i++)
         free(matriz[i]);
     free(matriz);
 }
 
-void novoNumeroAleatorio(int n, int **matriz)
+void novoNumeroAleatorio(int n, int **matriz) // cria um novo número aleatório em uma celula aleatória da matriz
 {
-    srand(time(NULL));
+    srand(time(NULL)); // semente pra geração de número aleatório
 
     int i, j;               // coordenadas da matriz
     int probabilidade, nro; // define a probabilidade de a nova peça ser um 4;
-    do
+    do                      // define coordenadas
     {
         i = rand() % n;
         j = rand() % n;
     } while (matriz[i][j] != 0);
 
-    switch (n)
+    switch (n) // define a probabilidade com base no tamanho do tabuleiro
     {
     case 4:
         probabilidade = 10;
@@ -209,9 +209,9 @@ void novoNumeroAleatorio(int n, int **matriz)
         break;
     }
 
-    nro = (rand() % 100) + 1;
+    nro = (rand() % 100) + 1; // gera número de 1 a 100
 
-    if (nro < probabilidade)
+    if (nro < probabilidade) // define qual será o valor da nova peça
     {
         matriz[i][j] = 4;
     }
@@ -219,38 +219,38 @@ void novoNumeroAleatorio(int n, int **matriz)
         matriz[i][j] = 2;
 }
 
-void movimentação(int n, int **matriz)
+void movimentação(int n, int **matriz) // movimenta as peças no tabuleiro
 {
-    int moveu;
-    int **matrizAux = criaMatriz(n);
+    int moveu;                       // variavel que mostra quando o movimento não é mais possivel
+    int **matrizAux = criaMatriz(n); // criando matriz auxiliar
     do
     {
-        moveu = 0;
+        moveu = 0; // começa o movimento com a variavel como 0
 
         for (int i = 0; i < n; i++)
         {
             for (int j = 1; j < n; j++)
             {
-                if (matriz[i][j] != 0 && matriz[i][j - 1] == 0)
+                if (matriz[i][j] != 0 && matriz[i][j - 1] == 0) // move a peça e troca o valor da posição inicial por 0
                 {
                     matriz[i][j - 1] = matriz[i][j];
                     matriz[i][j] = 0;
 
-                    moveu = 1;
+                    moveu = 1; // variavel indicando que houve movimento
                 }
-                else if (matriz[i][j] != 0 && matriz[i][j - 1] == matriz[i][j] && matrizAux[i][j - 1] == 0 && matrizAux[i][j] == 0)
+                else if (matriz[i][j] != 0 && matriz[i][j - 1] == matriz[i][j] && matrizAux[i][j - 1] == 0 && matrizAux[i][j] == 0) // movimento pra quando as peças devem ser combinadas
                 {
                     matriz[i][j - 1] = (matriz[i][j]) * 2;
                     matriz[i][j] = 0;
 
                     matrizAux[i][j - 1] = 1;
 
-                    moveu = 1;
+                    moveu = 1; // variavel indicando que houve movimento
                 }
             }
         }
 
-    } while (moveu);
+    } while (moveu); // lógica booleana que repete o código enquanto a condição "moveu" for verdadeira
 
-    liberaMatriz(matrizAux, n);
+    liberaMatriz(matrizAux, n); // libera a matriz auxiliar criada
 }
