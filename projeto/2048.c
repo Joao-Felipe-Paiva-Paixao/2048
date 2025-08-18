@@ -219,7 +219,7 @@ void novoNumeroAleatorio(int n, int **matriz) // cria um novo número aleatório
         matriz[i][j] = 2;
 }
 
-void movimentação(int n, int **matriz) // movimenta as peças no tabuleiro
+void movimentacaoEsquerda(int n, int **matriz) // movimenta as peças no tabuleiro
 {
     int moveu;                       // variavel que mostra quando o movimento não é mais possivel
     int **matrizAux = criaMatriz(n); // criando matriz auxiliar
@@ -244,6 +244,114 @@ void movimentação(int n, int **matriz) // movimenta as peças no tabuleiro
                     matriz[i][j] = 0;
 
                     matrizAux[i][j - 1] = 1;
+
+                    moveu = 1; // variavel indicando que houve movimento
+                }
+            }
+        }
+
+    } while (moveu); // lógica booleana que repete o código enquanto a condição "moveu" for verdadeira
+
+    liberaMatriz(matrizAux, n); // libera a matriz auxiliar criada
+}
+
+void movimentacaoDireita(int n, int **matriz) // movimenta as peças no tabuleiro
+{
+    int moveu;                       // variavel que mostra quando o movimento não é mais possivel
+    int **matrizAux = criaMatriz(n); // criando matriz auxiliar
+    do
+    {
+        moveu = 0; // começa o movimento com a variavel como 0
+
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = 0; j < n - 1; j++)
+            {
+                if (matriz[i][j] != 0 && matriz[i][j + 1] == 0) // move a peça e troca o valor da posição inicial por 0
+                {
+                    matriz[i][j + 1] = matriz[i][j];
+                    matriz[i][j] = 0;
+
+                    moveu = 1; // variavel indicando que houve movimento
+                }
+                else if (matriz[i][j] != 0 && matriz[i][j + 1] == matriz[i][j] && matrizAux[i][j + 1] == 0 && matrizAux[i][j] == 0) // movimento pra quando as peças devem ser combinadas
+                {
+                    matriz[i][j + 1] = (matriz[i][j]) * 2;
+                    matriz[i][j] = 0;
+
+                    matrizAux[i][j + 1] = 1;
+
+                    moveu = 1; // variavel indicando que houve movimento
+                }
+            }
+        }
+
+    } while (moveu); // lógica booleana que repete o código enquanto a condição "moveu" for verdadeira
+
+    liberaMatriz(matrizAux, n); // libera a matriz auxiliar criada
+}
+
+void movimentacaoCima(int n, int **matriz) // movimenta as peças no tabuleiro
+{
+    int moveu;                       // variavel que mostra quando o movimento não é mais possivel
+    int **matrizAux = criaMatriz(n); // criando matriz auxiliar
+    do
+    {
+        moveu = 0; // começa o movimento com a variavel como 0
+
+        for (int i = 1; i < n; i++)
+        {
+            for (int j = 0; j < n; j++)
+            {
+                if (matriz[i][j] != 0 && matriz[i - 1][j] == 0) // move a peça e troca o valor da posição inicial por 0
+                {
+                    matriz[i - 1][j] = matriz[i][j];
+                    matriz[i][j] = 0;
+
+                    moveu = 1; // variavel indicando que houve movimento
+                }
+                else if (matriz[i][j] != 0 && matriz[i - 1][j] == matriz[i][j] && matrizAux[i - 1][j] == 0 && matrizAux[i][j] == 0) // movimento pra quando as peças devem ser combinadas
+                {
+                    matriz[i - 1][j] = (matriz[i][j]) * 2;
+                    matriz[i][j] = 0;
+
+                    matrizAux[i - 1][j] = 1;
+
+                    moveu = 1; // variavel indicando que houve movimento
+                }
+            }
+        }
+
+    } while (moveu); // lógica booleana que repete o código enquanto a condição "moveu" for verdadeira
+
+    liberaMatriz(matrizAux, n); // libera a matriz auxiliar criada
+}
+
+void movimentacaoBaixo(int n, int **matriz) // movimenta as peças no tabuleiro
+{
+    int moveu;                       // variavel que mostra quando o movimento não é mais possivel
+    int **matrizAux = criaMatriz(n); // criando matriz auxiliar
+    do
+    {
+        moveu = 0; // começa o movimento com a variavel como 0
+
+        for (int i = 0; i < n - 1; i++)
+        {
+            for (int j = 0; j < n; j++)
+            {
+                if (matriz[i][j] != 0 && matriz[i + 1][j] == 0) // move a peça e troca o valor da posição inicial por 0
+                {
+                    matriz[i + 1][j] = matriz[i][j];
+                    matriz[i][j] = 0;
+
+                    moveu = 1; // variavel indicando que houve movimento
+                }
+                else if (matriz[i][j] != 0 && matriz[i + 1][j] == matriz[i][j] && matrizAux[i + 1][j] == 0 && matrizAux[i][j] == 0) // movimento pra quando as peças devem ser combinadas
+                {
+                    matriz[i + 1][j] = (matriz[i][j]) * 2;
+                    matriz[i][j] = 0;
+
+                    matrizAux[i + 1][j] = 1;
 
                     moveu = 1; // variavel indicando que houve movimento
                 }

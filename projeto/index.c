@@ -34,14 +34,44 @@ int main()
             char jogada;
 
             novoNumeroAleatorio(tamanho, matriz);
+            novoNumeroAleatorio(tamanho, matriz);
             do
             {
-                novoNumeroAleatorio(tamanho, matriz);
                 imprimeTabuleiro(tamanho, matriz);
                 printf("Jogada: ");
-                scanf("%c", &jogada);
-                limpar_buffer();
-                movimentação(tamanho, matriz);
+                do
+                {
+                    scanf("%c", &jogada);
+                    limpar_buffer();
+
+                    switch (jogada)
+                    {
+                    case 'd':
+                        movimentacaoDireita(tamanho, matriz);
+                        break;
+
+                    case 'a':
+                        movimentacaoEsquerda(tamanho, matriz);
+                        break;
+
+                    case 'w':
+                        movimentacaoCima(tamanho, matriz);
+                        break;
+
+                    case 's':
+                        movimentacaoBaixo(tamanho, matriz);
+                        break;
+
+                    case 'u':
+                        break;
+
+                    default:
+                        printf("Jogada inválida tente novamente: ");
+                        jogada = '`';
+                    }
+                } while (jogada == '`');
+
+                novoNumeroAleatorio(tamanho, matriz);
 
                 if (jogada == 'u')
                     break;
