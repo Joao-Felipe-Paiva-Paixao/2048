@@ -16,9 +16,11 @@ void liberaMatriz(int **matriz, int n);         // libera uma matriz criada em a
 int tamanhoCelula(int n, int **matriz);         // define tamanho da célula
 int **inicializaMatriz(int n, int **matriz);    // inicializa matriz
 void novoNumeroAleatorio(int n, int **matriz);  // gera um número aleatório em uma célula vazia da matriz
+int confereMovimento(int n, int **matriz, int **matrizAux);
 void movimentacaoEsquerda(int n, int **matriz); // movimenta as peças no tabuleiro
 void movimentacaoDireita(int n, int **matriz);  // movimenta as peças no tabuleiro
 void movimentacaoCima(int n, int **matriz);     // movimenta as peças no tabuleiro
 void movimentacaoBaixo(int n, int **matriz);    // movimenta as peças no tabuleiro
+char verificaEntrada();                         // lê e valida a entrada de um único caractere do usuário
 
 #endif

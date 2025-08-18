@@ -219,6 +219,20 @@ void novoNumeroAleatorio(int n, int **matriz) // cria um novo número aleatório
         matriz[i][j] = 2;
 }
 
+int confereMovimento(int n, int **matriz, int **matrizAux)
+{
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            if (matriz[i][j] != matrizAux[i][j])
+                return 1;
+        }
+    }
+
+    return 0;
+}
+
 void movimentacaoEsquerda(int n, int **matriz) // movimenta as peças no tabuleiro
 {
     int moveu;                       // variavel que mostra quando o movimento não é mais possivel
@@ -361,4 +375,25 @@ void movimentacaoBaixo(int n, int **matriz) // movimenta as peças no tabuleiro
     } while (moveu); // lógica booleana que repete o código enquanto a condição "moveu" for verdadeira
 
     liberaMatriz(matrizAux, n); // libera a matriz auxiliar criada
+}
+
+char verificaEntrada() // lê e valida a entrada de um único caractere do usuário
+{
+    char entrada[10];
+    char escolha;
+
+    do
+    {
+        fgets(entrada, 10, stdin);
+
+        if (entrada[0] != '\n' && entrada[1] == '\n')
+        {
+            escolha = entrada[0];
+            return escolha; // Retorna o caractere se a entrada for válida
+        }
+        else
+        {
+            printf("Resposta inválida!! Digite apenas uma letra e pressione Enter.\n");
+        }
+    } while (1);
 }

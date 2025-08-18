@@ -7,23 +7,39 @@ int main()
 
     do
     {
-        imprimeMenu();         // imprime o menu de decisão
-        scanf("%c", &escolha); // recebe decisão do usuário
-        limpar_buffer();
+        imprimeMenu();               // imprime o menu de decisão
+        escolha = verificaEntrada(); // lê e valida a entrada de um único caractere do usuário
 
         switch (escolha)
         {
         case 'r': // o programa deve encerrar
         case 'R':
         {
-            printf("Deseja mesmo sair?(Digite [S] ou [N]):");
-            scanf("%c", &confirmacao);
-            limpar_buffer();
-            if (confirmacao == 'S' || confirmacao == 's')
-                return 0;
-            else
-                escolha = '`';
+            do
+            {
+                printf("Deseja mesmo sair?(Digite [S] ou [N]):");
+                confirmacao = verificaEntrada();
 
+                switch (confirmacao)
+                {
+                case 's':
+                case 'S':
+                    printf("Encerrando sessão, obrigado por jogar!!\n");
+                    return 0;
+                    break;
+
+                case 'n':
+                case 'N':
+                    printf("Voltando ao menu...\n");
+                    break;
+
+                default:
+                    printf("Resposta inválida!!Tente novamente\n");
+                    confirmacao = '`';
+                    break;
+                }
+            } while (confirmacao == '`');
+            escolha = '`';
             break;
         }
         case 'n': // cria um novo jogo
@@ -31,20 +47,40 @@ int main()
         {
             int tamanho = tamanhoTabuleiro();
             int **matriz = criaMatriz(tamanho);
-            char jogada;
+            int **matrizAux = criaMatriz(tamanho);
+            int voltarMenu = 0; // flag usada pra voltar ao menu
+            char jogada[20], jogadaChar;
 
             novoNumeroAleatorio(tamanho, matriz);
             novoNumeroAleatorio(tamanho, matriz);
-            do
+
+            do // loop principal
             {
+                for (int i = 0; i < tamanho; i++)
+                {
+                    for (int j = 0; j < tamanho; j++)
+                    {
+                        matrizAux[i][j] = matriz[i][j];
+                    }
+                }
+
                 imprimeTabuleiro(tamanho, matriz);
                 printf("Jogada: ");
-                do
-                {
-                    scanf("%c", &jogada);
-                    limpar_buffer();
 
-                    switch (jogada)
+                fgets(jogada, 20, stdin);
+                jogada[strcspn(jogada, "\n")] = '\0'; // a função strcspn conta o número de algarismos até que a string 1 coincida com a 2, assim podemos trocar o valor da posição do "\n" por '\0'
+
+                if (strcmp(jogada, "voltar") == 0) // compara duas strings e retorna 0 se forem iguais
+                {
+                    printf("Voltando ao menu principal...\n");
+                    voltarMenu = 1;
+                    continue;
+                }
+                else if (strlen(jogada) == 1)
+                {
+                    jogadaChar = jogada[0];
+
+                    switch (jogadaChar)
                     {
                     case 'd':
                         movimentacaoDireita(tamanho, matriz);
@@ -67,17 +103,27 @@ int main()
 
                     default:
                         printf("Jogada inválida tente novamente: ");
-                        jogada = '`';
+                        continue;
                     }
-                } while (jogada == '`');
+                }
+                else
+                {
+                    printf("Comando inválido. Tente novamente.\n");
+                    continue;
+                }
 
-                novoNumeroAleatorio(tamanho, matriz);
-
-                if (jogada == 'u')
-                    break;
-            } while (1 < 2);
+                if (confereMovimento(tamanho, matriz, matrizAux))
+                {
+                    novoNumeroAleatorio(tamanho, matriz);
+                }
+                else
+                {
+                    printf("Jogada inválida tente novamente: \n");
+                }
+            } while (!voltarMenu);
 
             liberaMatriz(matriz, tamanho);
+            liberaMatriz(matrizAux, tamanho);
             break;
         }
         case 'j':
