@@ -422,6 +422,11 @@ void novoJogo() // corresponde a opção de novo jogo no menu
     int tamanho = tamanhoTabuleiro();
     int **matriz = criaMatriz(tamanho);
     int **matrizAux = criaMatriz(tamanho);
+    Usuario usuario;
+
+    printf("Digite o seu nome: ");
+    scanf("%s", usuario.nomeUser);
+    limpar_buffer();
 
     novoNumeroAleatorio(tamanho, matriz);
     novoNumeroAleatorio(tamanho, matriz);
@@ -553,6 +558,30 @@ int vitoriaDecisao()
     return decisao;
 }
 
+void imprimeMatrizArq(int tamanho, int **matriz, FILE *arquivo)
+{
+    for (int i = 0; i < tamanho; i++)
+    {
+        for (int j = 0; j < tamanho; j++)
+        {
+            fprintf(arquivo, "%d ", matriz[i][j]);
+        }
+        fprintf(arquivo, "\n");
+    }
+}
+
+void saveState(GameState *gameState) // salvar em arquivo saveState
+{
+    FILE *arquivo = fopen("saveState.txt", "w");
+
+    fprintf(arquivo, "%d %d %d\n%d %s\n", gameState->tamanho, gameState->desfazer, gameState->trocar, gameState->pontuacao, gameState->nomeUser);
+
+    imprimeMatrizArq(gameState->tamanho, gameState->matrizAtual, arquivo);
+    imprimeMatrizArq(gameState->tamanho, gameState->matrizAnterior, arquivo);
+
+    fclose(arquivo);
+}
+
 // pedir info de usuário, criar aquivo com o nome que o usuário decidir
 //  função
 // saveState(char nomeArq, int tamMatriz,int desfazer,int trocar, int pontuação, int nomeUser, int **matrizAtual, int **matrizAnterior); transformar info em struct
@@ -577,3 +606,6 @@ INFO DE FORMATO ARQUIVO
 <MATRIZ_TABULEIRO_ULTIMA_JOGADA>: matriz de int com dimensão TAMANHO x TAMANHO, com os valores das células da última jogada. O valor 0 (zero) indica uma posição vazia*/
 
 // criar função em jogo, passar como parametros o tamanho e a matriz, save state a cada movimento
+
+// fazer função perdeuJogo
+// fazer a função pontuação e mostrar no final
