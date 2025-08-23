@@ -23,23 +23,24 @@ void novoJogo();                   // corresponde a opção de novo jogo no menu
 void emJogo(GameState *gameState); // função de jogo
 
 // funções que interagem com o usuário
-void imprimeMenu();                         // imprime o menu no terminal
-void imprimeTabuleiro(int n, int **matriz); // imprime o tabuleiro do jogo
-int imprimeAjuda(int ajudaOk);              // imprime o texto de ajuda no terminal
-char verificaEntrada();                     // lê e valida a entrada de um único caractere do usuário
-int tamanhoTabuleiro();                     // decide o tamanho do tabuleiro
-int vitoriaDecisao();                       // usuário decide se continuará no jogo
+void imprimeMenu();                                        // imprime o menu no terminal
+void imprimeTabuleiro(int n, int **matriz, int pontuação); // imprime o tabuleiro do jogo
+int imprimeAjuda(int ajudaOk);                             // imprime o texto de ajuda no terminal
+char verificaEntrada();                                    // lê e valida a entrada de um único caractere do usuário
+int tamanhoTabuleiro();                                    // decide o tamanho do tabuleiro
+int vitoriaDecisao();                                      // usuário decide se continuará no jogo
+int derrotaOk();                                           // usuário responde após derrota
 
 // movimentação
-void movimentacaoEsquerda(int n, int **matriz); // movimenta as peças no tabuleiro
-void movimentacaoDireita(int n, int **matriz);  // movimenta as peças no tabuleiro
-void movimentacaoCima(int n, int **matriz);     // movimenta as peças no tabuleiro
-void movimentacaoBaixo(int n, int **matriz);    // movimenta as peças no tabuleiro
+int movimentacaoEsquerda(int n, int **matriz, int *desfazer); // movimenta as peças no tabuleiro
+int movimentacaoDireita(int n, int **matriz, int *desfazer);  // movimenta as peças no tabuleiro
+int movimentacaoCima(int n, int **matriz, int *desfazer);     // movimenta as peças no tabuleiro
+int movimentacaoBaixo(int n, int **matriz, int *desfazer);    // movimenta as peças no tabuleiro
 
 // verificações do gameState
 int confereMovimento(int n, int **matriz, int **matrizAux); // função que confere se houve movimento no tabuleiro do jogo
 int verificaGanhou(int tamanho, int **matriz);              // verifica se alguma célula do tabuleiro é 2048
-void contaPontuacao(GameState *gameState);
+int verificaPerdeu(int tamanho, int **matriz);              // verifica se há movimento válido
 
 // geração de matriz
 int **criaMatriz(int n);                       // cria uma matriz com alocação dinamica

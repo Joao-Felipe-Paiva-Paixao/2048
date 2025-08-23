@@ -28,6 +28,7 @@ void novoJogo() // corresponde a opção de novo jogo no menu
 void emJogo(GameState *gameState) // função de jogo
 {
     int ganhou = 0;
+    int movimentoDesfeito = 0;
     int voltarMenu = 0; // flag usada pra voltar ao menu
     char jogada[20], jogadaChar;
     int **matrizAux = criaMatriz(gameState->tamanho); // matriz auxiliar
@@ -39,10 +40,11 @@ void emJogo(GameState *gameState) // função de jogo
             for (int j = 0; j < gameState->tamanho; j++)
             {
                 matrizAux[i][j] = gameState->matrizAtual[i][j];
+                gameState->matrizAnterior[i][j] = gameState->matrizAtual[i][j];
             }
         }
 
-        imprimeTabuleiro(gameState->tamanho, gameState->matrizAtual);
+        imprimeTabuleiro(gameState->tamanho, gameState->matrizAtual, gameState->pontuacao);
 
         fgets(jogada, 20, stdin);
         removeN(jogada);
@@ -60,23 +62,44 @@ void emJogo(GameState *gameState) // função de jogo
             switch (jogadaChar)
             {
             case 'd':
-                movimentacaoDireita(gameState->tamanho, gameState->matrizAtual);
+                gameState->pontuacao += movimentacaoDireita(gameState->tamanho, gameState->matrizAtual, &gameState->desfazer);
+                movimentoDesfeito = 0;
                 break;
 
             case 'a':
-                movimentacaoEsquerda(gameState->tamanho, gameState->matrizAtual);
+                gameState->pontuacao += movimentacaoEsquerda(gameState->tamanho, gameState->matrizAtual, &gameState->desfazer);
+                movimentoDesfeito = 0;
                 break;
 
             case 'w':
-                movimentacaoCima(gameState->tamanho, gameState->matrizAtual);
+                gameState->pontuacao += movimentacaoCima(gameState->tamanho, gameState->matrizAtual, &gameState->desfazer);
+                movimentoDesfeito = 0;
                 break;
 
             case 's':
-                movimentacaoBaixo(gameState->tamanho, gameState->matrizAtual);
+                gameState->pontuacao += movimentacaoBaixo(gameState->tamanho, gameState->matrizAtual, &gameState->desfazer);
+                movimentoDesfeito = 0;
                 break;
 
             case 'u':
-                break;
+                if (!movimentoDesfeito && gameState->desfazer > 0) // o movimento é valido quando não foi feito na última jogada e o jogador tem um "credito"
+                {
+                    for (int i = 0; i < gameState->tamanho; i++)
+                    {
+                        for (int j = 0; j < gameState->tamanho; j++)
+                        {
+                            gameState->matrizAtual[i][j] = gameState->matrizAnterior[i][j];
+                        }
+                    }
+                    movimentoDesfeito = 1;
+                    gameState->desfazer--; // remove uma chance de desfazer movimento
+                }
+                else
+                {
+                    printf("Você não pode desfazer o movimento!!\n");
+                }
+
+                continue;
 
             default:
                 printf("Jogada inválida tente novamente: ");
@@ -98,8 +121,6 @@ void emJogo(GameState *gameState) // função de jogo
             printf("Jogada inválida tente novamente: \n");
         }
 
-        contaPontuacao(gameState);
-
         if (!ganhou)
         {
             if (verificaGanhou(gameState->tamanho, gameState->matrizAtual))
@@ -112,6 +133,14 @@ void emJogo(GameState *gameState) // função de jogo
             }
         }
 
+        if (verificaPerdeu(gameState->tamanho, gameState->matrizAtual))
+        {
+            imprimeTabuleiro(gameState->tamanho, gameState->matrizAtual, gameState->pontuacao);
+            derrotaOk();
+            voltarMenu = 1;
+        }
+
+        // função saveState
     } while (!voltarMenu);
 }
 
@@ -131,12 +160,12 @@ void imprimeMenu() // imprime o menu no terminal
     printf("\nDigite a sua resposta: ");
 }
 
-void imprimeTabuleiro(int n, int **matriz) // imprime o tabuleiro do jogo
+void imprimeTabuleiro(int n, int **matriz, int pontuação) // imprime o tabuleiro do jogo
 {
     char espaço = ' ';
-
     int tamanhoDaCelula = tamanhoCelula(n, matriz);
 
+    printf("PONTUAÇÃO: %d\n", pontuação);
     printf("   "); // letras
     for (int i = 0; i < n; i++)
     {
@@ -294,12 +323,33 @@ int vitoriaDecisao()
     return decisao;
 }
 
+int derrotaOk()
+{
+    int resposta;
+    printf("Que pena!! Infelizmente você perdeu, para voltar ao menu digite [1]: ");
+    scanf("%d", &resposta);
+    limpar_buffer();
+
+    do
+    {
+        if (resposta != 1)
+        {
+            printf("Resposta inválida!! Por favor digite novamente: ");
+            scanf("%d", &resposta);
+            limpar_buffer();
+        }
+    } while (resposta != 1);
+
+    return resposta;
+}
+
 // movimentação
 
-void movimentacaoEsquerda(int n, int **matriz) // movimenta as peças no tabuleiro
+int movimentacaoEsquerda(int n, int **matriz, int *desfazer) // movimenta as peças no tabuleiro e retorna a pontuação da jogada
 {
     int moveu;                       // variavel que mostra quando o movimento não é mais possivel
     int **matrizAux = criaMatriz(n); // criando matriz auxiliar
+    int pontuacao = 0;
     do
     {
         moveu = 0; // começa o movimento com a variavel como 0
@@ -317,8 +367,14 @@ void movimentacaoEsquerda(int n, int **matriz) // movimenta as peças no tabulei
                 }
                 else if (matriz[i][j] != 0 && matriz[i][j - 1] == matriz[i][j] && matrizAux[i][j - 1] == 0 && matrizAux[i][j] == 0) // movimento pra quando as peças devem ser combinadas
                 {
+                    if (matriz[i][j] == 128) // verifica se o usuário deve receber um novo movimento de desfazer
+                    {
+                        (*desfazer)++;
+                    }
+
                     matriz[i][j - 1] = (matriz[i][j]) * 2;
                     matriz[i][j] = 0;
+                    pontuacao += matriz[i][j - 1];
 
                     matrizAux[i][j - 1] = 1;
 
@@ -330,12 +386,15 @@ void movimentacaoEsquerda(int n, int **matriz) // movimenta as peças no tabulei
     } while (moveu); // lógica booleana que repete o código enquanto a condição "moveu" for verdadeira
 
     liberaMatriz(matrizAux, n); // libera a matriz auxiliar criada
+    return pontuacao;
 }
 
-void movimentacaoDireita(int n, int **matriz) // movimenta as peças no tabuleiro
+int movimentacaoDireita(int n, int **matriz, int *desfazer) // movimenta as peças no tabuleiro e retorna a pontuação da jogada
 {
     int moveu;                       // variavel que mostra quando o movimento não é mais possivel
     int **matrizAux = criaMatriz(n); // criando matriz auxiliar
+    int pontuacao = 0;
+
     do
     {
         moveu = 0; // começa o movimento com a variavel como 0
@@ -353,8 +412,14 @@ void movimentacaoDireita(int n, int **matriz) // movimenta as peças no tabuleir
                 }
                 else if (matriz[i][j] != 0 && matriz[i][j + 1] == matriz[i][j] && matrizAux[i][j + 1] == 0 && matrizAux[i][j] == 0) // movimento pra quando as peças devem ser combinadas
                 {
+                    if (matriz[i][j] == 128) // verifica se o usuário deve receber um novo movimento de desfazer
+                    {
+                        (*desfazer)++;
+                    }
+
                     matriz[i][j + 1] = (matriz[i][j]) * 2;
                     matriz[i][j] = 0;
+                    pontuacao += matriz[i][j + 1];
 
                     matrizAux[i][j + 1] = 1;
 
@@ -366,12 +431,15 @@ void movimentacaoDireita(int n, int **matriz) // movimenta as peças no tabuleir
     } while (moveu); // lógica booleana que repete o código enquanto a condição "moveu" for verdadeira
 
     liberaMatriz(matrizAux, n); // libera a matriz auxiliar criada
+    return pontuacao;
 }
 
-void movimentacaoCima(int n, int **matriz) // movimenta as peças no tabuleiro
+int movimentacaoCima(int n, int **matriz, int *desfazer) // movimenta as peças no tabuleiro e retorna a pontuação da jogada
 {
     int moveu;                       // variavel que mostra quando o movimento não é mais possivel
     int **matrizAux = criaMatriz(n); // criando matriz auxiliar
+    int pontuacao = 0;
+
     do
     {
         moveu = 0; // começa o movimento com a variavel como 0
@@ -389,8 +457,14 @@ void movimentacaoCima(int n, int **matriz) // movimenta as peças no tabuleiro
                 }
                 else if (matriz[i][j] != 0 && matriz[i - 1][j] == matriz[i][j] && matrizAux[i - 1][j] == 0 && matrizAux[i][j] == 0) // movimento pra quando as peças devem ser combinadas
                 {
+                    if (matriz[i][j] == 128) // verifica se o usuário deve receber um novo movimento de desfazer
+                    {
+                        (*desfazer)++;
+                    }
+
                     matriz[i - 1][j] = (matriz[i][j]) * 2;
                     matriz[i][j] = 0;
+                    pontuacao += matriz[i - 1][j];
 
                     matrizAux[i - 1][j] = 1;
 
@@ -402,12 +476,15 @@ void movimentacaoCima(int n, int **matriz) // movimenta as peças no tabuleiro
     } while (moveu); // lógica booleana que repete o código enquanto a condição "moveu" for verdadeira
 
     liberaMatriz(matrizAux, n); // libera a matriz auxiliar criada
+    return pontuacao;
 }
 
-void movimentacaoBaixo(int n, int **matriz) // movimenta as peças no tabuleiro
+int movimentacaoBaixo(int n, int **matriz, int *desfazer) // movimenta as peças no tabuleiro e retorna a pontuação da jogada
 {
     int moveu;                       // variavel que mostra quando o movimento não é mais possivel
     int **matrizAux = criaMatriz(n); // criando matriz auxiliar
+    int pontuacao = 0;
+
     do
     {
         moveu = 0; // começa o movimento com a variavel como 0
@@ -425,8 +502,14 @@ void movimentacaoBaixo(int n, int **matriz) // movimenta as peças no tabuleiro
                 }
                 else if (matriz[i][j] != 0 && matriz[i + 1][j] == matriz[i][j] && matrizAux[i + 1][j] == 0 && matrizAux[i][j] == 0) // movimento pra quando as peças devem ser combinadas
                 {
+                    if (matriz[i][j] == 128) // verifica se o usuário deve receber um novo movimento de desfazer
+                    {
+                        (*desfazer)++;
+                    }
+
                     matriz[i + 1][j] = (matriz[i][j]) * 2;
                     matriz[i][j] = 0;
+                    pontuacao += matriz[i + 1][j];
 
                     matrizAux[i + 1][j] = 1;
 
@@ -438,6 +521,7 @@ void movimentacaoBaixo(int n, int **matriz) // movimenta as peças no tabuleiro
     } while (moveu); // lógica booleana que repete o código enquanto a condição "moveu" for verdadeira
 
     liberaMatriz(matrizAux, n); // libera a matriz auxiliar criada
+    return pontuacao;
 }
 
 // verificações do gameState
@@ -472,15 +556,37 @@ int verificaGanhou(int tamanho, int **matriz)
     return 0;
 }
 
-void contaPontuacao(GameState *gameState)
+int verificaPerdeu(int tamanho, int **matriz)
 {
-    for (int i = 0; i < gameState->tamanho; i++)
+    for (int i = 0; i < tamanho; i++)
     {
-        for (int j = 0; j < gameState->tamanho; j++)
+        for (int j = 0; j < tamanho; j++)
         {
-            gameState->pontuacao += gameState->matrizAtual[i][j];
+            if (matriz[i][j] == 0)
+            {
+                return 0; // se houver uma celula vazia ainda existem jogadas válidas
+            }
         }
     }
+
+    for (int i = 0; i < tamanho; i++)
+    {
+        for (int j = 0; j < tamanho; j++)
+        {
+            // verifica célula a direita
+            if (j < tamanho - 1 && matriz[i][j] == matriz[i][j + 1])
+            {
+                return 0; // se encontrar jogadas possiveis
+            }
+            // verifica célula a esquerda
+            if (i < tamanho - 1 && matriz[i][j] == matriz[i + 1][j])
+            {
+                return 0; // se encontrar jogadas possiveis
+            }
+        }
+    }
+
+    return 1; // se não houver jogada possível o usuario perde
 }
 
 // geração de matriz
