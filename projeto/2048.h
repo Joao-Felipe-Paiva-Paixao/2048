@@ -21,12 +21,19 @@ typedef struct
     int **matrizAnterior; // para a função de desfazer
 } GameState;
 
+typedef struct
+{
+    char nomeUser[27];
+    int pontuacao;
+} Ranking;
+
 // funções principais de jogo
 void novoJogo();                   // corresponde a opção de novo jogo no menu
 void emJogo(GameState *gameState); // função de jogo
 void continuarJogo();              // continua o último jogo
 void carregarJogo();               // carrega jogo salvo
 void salvarJogo();                 // salva jogo em um arquivo
+void mostraRanking();              // mostra o ranking de pontuações
 
 // funções que interagem com o usuário
 void imprimeMenu();                                             // imprime o menu no terminal
@@ -62,6 +69,7 @@ void saveState(GameState *gameState, char nomeArq[30]);          // salvar em ar
 void imprimeMatrizArq(int tamanho, int **matriz, FILE *arquivo); // imprime matriz de jogo em arquivo
 void leMatrizArq(int tamanho, int **matriz, FILE *arquivo);
 void leArquivo(GameState *gameState, char nomeArq[30]);
+void escreveRanking(GameState *gameState);
 
 // funções utilitárias
 void limpar_buffer();     // limpa o buffer

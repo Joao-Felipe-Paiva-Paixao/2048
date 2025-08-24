@@ -5,6 +5,8 @@
 
 int main()
 {
+
+    srand(time(NULL)); // semente pra geração de número aleatório
     char escolha, confirmacao;
     GameState *gameState;
 
@@ -65,7 +67,7 @@ int main()
         }
         case 'm': // mostrar ranking
         {
-            printf("Chegou\n");
+            mostraRanking();
             break;
         }
         case 'a': // mostra o texto de ajuda

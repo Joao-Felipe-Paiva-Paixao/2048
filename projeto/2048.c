@@ -87,6 +87,50 @@ void salvarJogo()
     // chamar função salvaRanking
 }
 
+void mostraRanking()
+{
+    int n4, n5, n6;
+    FILE *arquivo = fopen("ranking.dat", "r");
+
+    if (arquivo == NULL)
+    {
+        printf("\nAinda não há um ranking para mostrar!\n");
+        return;
+    }
+
+    fscanf(arquivo, "%d %d %d", &n4, &n5, &n6);
+    Ranking score;
+
+    if (n4 > 0)
+    {
+        printf("-------- RANKING 4x4 --------\n");
+        for (int i = 0; i < n4; i++)
+        {
+            fscanf(arquivo, "%s %d", score.nomeUser, &score.pontuacao);
+            printf("%2d. %-20s %d\n", i + 1, score.nomeUser, score.pontuacao);
+        }
+    }
+    if (n5 > 0)
+    {
+        printf("-------- RANKING 5x5 --------\n");
+        for (int i = 0; i < n5; i++)
+        {
+            fscanf(arquivo, "%s %d", score.nomeUser, &score.pontuacao);
+            printf("%2d. %-20s %d\n", i + 1, score.nomeUser, score.pontuacao);
+        }
+    }
+    if (n6 > 0)
+    {
+        printf("-------- RANKING 6x6 --------\n");
+        for (int i = 0; i < n6; i++)
+        {
+            fscanf(arquivo, "%s %d", score.nomeUser, &score.pontuacao);
+            printf("%2d. %-20s %d\n", i + 1, score.nomeUser, score.pontuacao);
+        }
+    }
+    fclose(arquivo);
+}
+
 void emJogo(GameState *gameState) // função de jogo
 {
     int ganhou = 0;
@@ -276,6 +320,7 @@ void emJogo(GameState *gameState) // função de jogo
 
         // função saveState
     } while (!voltarMenu);
+    escreveRanking(gameState);
 }
 
 // funções que interagem com o usuário
@@ -878,8 +923,6 @@ int **inicializaMatriz(int n, int **matriz) // inicializa matriz
 
 void novoNumeroAleatorio(int n, int **matriz) // cria um novo número aleatório em uma celula aleatória da matriz
 {
-    srand(time(NULL)); // semente pra geração de número aleatório
-
     int i, j;               // coordenadas da matriz
     int probabilidade, nro; // define a probabilidade de a nova peça ser um 4;
     do                      // define coordenadas
@@ -989,6 +1032,92 @@ void leArquivo(GameState *gameState, char nomeArq[30])
 
     leMatrizArq(gameState->tamanho, gameState->matrizAtual, arquivo);
     leMatrizArq(gameState->tamanho, gameState->matrizAnterior, arquivo);
+
+    fclose(arquivo);
+}
+
+void escreveRanking(GameState *gameState)
+{
+    Ranking rank4[11], rank5[11], rank6[11];
+    int n4 = 0, n5 = 0, n6 = 0;
+    FILE *arquivo = fopen("ranking.dat", "r");
+
+    if (arquivo != NULL)
+    {
+        fscanf(arquivo, "%d %d %d", &n4, &n5, &n6);
+        for (int i = 0; i < n4; i++)
+            fscanf(arquivo, "%s %d", rank4[i].nomeUser, &rank4[i].pontuacao);
+        for (int i = 0; i < n5; i++)
+            fscanf(arquivo, "%s %d", rank5[i].nomeUser, &rank5[i].pontuacao);
+        for (int i = 0; i < n6; i++)
+            fscanf(arquivo, "%s %d", rank6[i].nomeUser, &rank6[i].pontuacao);
+        fclose(arquivo);
+    }
+
+    Ranking jogoAtual;
+
+    strcpy(jogoAtual.nomeUser, gameState->nomeUser);
+    jogoAtual.pontuacao = gameState->pontuacao;
+
+    if (gameState->tamanho == 4 && n4 < 11)
+    {
+        rank4[n4++] = jogoAtual;
+    }
+    else if (gameState->tamanho == 5 && n5 < 11)
+    {
+        rank5[n5++] = jogoAtual;
+    }
+    else if (gameState->tamanho == 6 && n6 < 11)
+    {
+        rank6[n6++] = jogoAtual;
+    }
+
+    Ranking *total = NULL;      // inicializa a struct com valor nulo
+    int *tamanhoRanking = NULL; // guarda o tamanho de cada lista de ranking
+
+    if (gameState->tamanho == 4)
+    {
+        total = rank4;
+        tamanhoRanking = &n4;
+    }
+    else if (gameState->tamanho == 5)
+    {
+        total = rank5;
+        tamanhoRanking = &n5;
+    }
+    else if (gameState->tamanho == 6)
+    {
+        total = rank6;
+        tamanhoRanking = &n6;
+    }
+
+    if (total != NULL)
+    {
+        for (int i = 0; i < *tamanhoRanking - 1; i++)
+        {
+            for (int j = 0; j < *tamanhoRanking - i - 1; j++)
+            {
+                if (total[j].pontuacao < total[j + 1].pontuacao)
+                {
+                    Ranking aux = total[j];
+                    total[j] = total[j + 1];
+                    total[j + 1] = aux;
+                }
+            }
+        }
+    }
+
+    arquivo = fopen("ranking.dat", "w");
+    if (arquivo == NULL)
+        return;
+
+    fprintf(arquivo, "%d %d %d\n", n4 > 10 ? 10 : n4, n5 > 10 ? 10 : n5, n6 > 10 ? 10 : n6);
+    for (int i = 0; i < n4 && i < 10; i++)
+        fprintf(arquivo, "%s %d\n", rank4[i].nomeUser, rank4[i].pontuacao);
+    for (int i = 0; i < n5 && i < 10; i++)
+        fprintf(arquivo, "%s %d\n", rank5[i].nomeUser, rank5[i].pontuacao);
+    for (int i = 0; i < n6 && i < 10; i++)
+        fprintf(arquivo, "%s %d\n", rank6[i].nomeUser, rank6[i].pontuacao);
 
     fclose(arquivo);
 }
