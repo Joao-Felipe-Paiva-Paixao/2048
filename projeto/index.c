@@ -1,8 +1,12 @@
+// João Felipe Paiva Paixão
+// 25.1.4014
+
 #include "2048.h" // incluindo biblioteca do jogo
 
 int main()
 {
     char escolha, confirmacao;
+    GameState *gameState;
 
     do
     {
@@ -44,22 +48,22 @@ int main()
             novoJogo();
             break;
         }
-        case 'j':
+        case 'j': // continua a partir do arquivo saveState.txt
         {
-            printf("Chegou\n");
+            continuarJogo();
             break;
         }
-        case 'c':
+        case 'c': // carrega jogo salvo
         {
-            printf("Chegou\n");
+            carregarJogo();
             break;
         }
-        case 's':
+        case 's': // salvar jogo
         {
-            printf("Chegou\n");
+            salvarJogo();
             break;
         }
-        case 'm':
+        case 'm': // mostrar ranking
         {
             printf("Chegou\n");
             break;

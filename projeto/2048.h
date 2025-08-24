@@ -1,3 +1,6 @@
+// João Felipe Paiva Paixão
+// 25.1.4014
+
 #ifndef FUNCTIONS_H // Remove a declaração anterior da biblioteca se existir
 #define FUNCTIONS_H // Cria declaração da biblioteca
 
@@ -21,15 +24,20 @@ typedef struct
 // funções principais de jogo
 void novoJogo();                   // corresponde a opção de novo jogo no menu
 void emJogo(GameState *gameState); // função de jogo
+void continuarJogo();              // continua o último jogo
+void carregarJogo();               // carrega jogo salvo
+void salvarJogo();                 // salva jogo em um arquivo
 
 // funções que interagem com o usuário
-void imprimeMenu();                                        // imprime o menu no terminal
-void imprimeTabuleiro(int n, int **matriz, int pontuação); // imprime o tabuleiro do jogo
-void imprimeAjuda();                                       // imprime o texto de ajuda no terminal
-char verificaEntrada();                                    // lê e valida a entrada de um único caractere do usuário
-int tamanhoTabuleiro();                                    // decide o tamanho do tabuleiro
-int vitoriaDecisao();                                      // usuário decide se continuará no jogo
-int derrotaOk();                                           // usuário responde após derrota
+void imprimeMenu();                                             // imprime o menu no terminal
+void imprimeTabuleiro(int n, int **matriz, int pontuação);      // imprime o tabuleiro do jogo
+void imprimeTabuleiroFinal(int n, int **matriz, int pontuação); // imprime o tabuleiro do jogo quando o usuário perde
+void imprimeAjuda();                                            // imprime o texto de ajuda no terminal
+char verificaEntrada();                                         // lê e valida a entrada de um único caractere do usuário
+int tamanhoTabuleiro();                                         // decide o tamanho do tabuleiro
+int vitoriaDecisao();                                           // usuário decide se continuará no jogo
+int derrotaOk();                                                // usuário responde após derrota
+void pedeNomeArq(char nomeArq[30]);
 
 // movimentação
 int movimentacaoEsquerda(int n, int **matriz, int *desfazer, int *trocar); // movimenta as peças no tabuleiro
@@ -50,8 +58,10 @@ void novoNumeroAleatorio(int n, int **matriz); // gera um número aleatório em 
 int tamanhoCelula(int n, int **matriz);        // define tamanho da célula
 
 // funções de arquivo
-void saveState(GameState *gameState);                            // salvar em arquivo saveState
+void saveState(GameState *gameState, char nomeArq[30]);          // salvar em arquivo saveState
 void imprimeMatrizArq(int tamanho, int **matriz, FILE *arquivo); // imprime matriz de jogo em arquivo
+void leMatrizArq(int tamanho, int **matriz, FILE *arquivo);
+void leArquivo(GameState *gameState, char nomeArq[30]);
 
 // funções utilitárias
 void limpar_buffer();     // limpa o buffer

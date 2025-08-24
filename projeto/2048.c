@@ -1,3 +1,6 @@
+// João Felipe Paiva Paixão
+// 25.1.4014
+
 #include "2048.h" //incluindo declarações das funções
 
 void novoJogo() // corresponde a opção de novo jogo no menu
@@ -23,6 +26,65 @@ void novoJogo() // corresponde a opção de novo jogo no menu
 
     liberaMatriz(gameState.matrizAtual, gameState.tamanho);
     liberaMatriz(gameState.matrizAnterior, gameState.tamanho);
+}
+
+void continuarJogo()
+{
+    GameState gameState;
+    char nomeArq[30];
+    strcpy(nomeArq, "saveState.txt");
+
+    leArquivo(&gameState, nomeArq);
+
+    if (gameState.tamanho > 0)
+    {
+        printf("\nContinuando o jogo de %s...\n", gameState.nomeUser);
+        emJogo(&gameState);
+
+        liberaMatriz(gameState.matrizAtual, gameState.tamanho);
+        liberaMatriz(gameState.matrizAnterior, gameState.tamanho);
+    }
+    else
+    {
+        printf("\nErro ao ler arquivo!!\n");
+    }
+}
+
+void carregarJogo()
+{
+    GameState gameState;
+    char nomeArq[30];
+    pedeNomeArq(nomeArq);
+
+    leArquivo(&gameState, nomeArq);
+
+    if (gameState.tamanho > 0)
+    {
+        printf("\nContinuando o jogo de %s...\n", gameState.nomeUser);
+        emJogo(&gameState);
+
+        liberaMatriz(gameState.matrizAtual, gameState.tamanho);
+        liberaMatriz(gameState.matrizAnterior, gameState.tamanho);
+    }
+    else
+    {
+        printf("\nErro ao ler arquivo!!\n");
+    }
+}
+
+void salvarJogo()
+{
+    GameState gameState;
+    char nomeArq[30];
+
+    strcpy(nomeArq, "saveState.txt");
+
+    leArquivo(&gameState, nomeArq);
+
+    pedeNomeArq(nomeArq);
+    saveState(&gameState, nomeArq);
+
+    // chamar função salvaRanking
 }
 
 void emJogo(GameState *gameState) // função de jogo
@@ -183,7 +245,10 @@ void emJogo(GameState *gameState) // função de jogo
 
         if (confereMovimento(gameState->tamanho, gameState->matrizAtual, matrizAux))
         {
+            char nomeArq[30];
+            strcpy(nomeArq, "saveState.txt");
             novoNumeroAleatorio(gameState->tamanho, gameState->matrizAtual);
+            saveState(gameState, nomeArq);
         }
         else
         {
@@ -204,7 +269,7 @@ void emJogo(GameState *gameState) // função de jogo
 
         if (verificaPerdeu(gameState->tamanho, gameState->matrizAtual))
         {
-            imprimeTabuleiro(gameState->tamanho, gameState->matrizAtual, gameState->pontuacao);
+            imprimeTabuleiroFinal(gameState->tamanho, gameState->matrizAtual, gameState->pontuacao);
             derrotaOk();
             voltarMenu = 1;
         }
@@ -313,6 +378,88 @@ void imprimeTabuleiro(int n, int **matriz, int pontuação) // imprime o tabulei
     printf("Jogada: ");
 }
 
+void imprimeTabuleiroFinal(int n, int **matriz, int pontuação) // imprime o tabuleiro do jogo quando o usuário perde
+{
+    char espaço = ' ';
+    int tamanhoDaCelula = tamanhoCelula(n, matriz);
+
+    printf("PONTUAÇÃO: %d\n", pontuação);
+    printf("   "); // letras
+    for (int i = 0; i < n; i++)
+    {
+        printf(" %*c ", tamanhoDaCelula, (char)97 + i);
+
+        if (i < n - 1)
+        {
+            printf(" ");
+        }
+    }
+    printf(" \n");
+
+    printf("  ┏"); // parte de cima
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < tamanhoDaCelula + 2; j++)
+        {
+            printf("━");
+        }
+        if (i < n - 1) // imprime uma junta se não for o fim da linha
+        {
+            printf("┳");
+        }
+    }
+    printf("┓\n");
+
+    for (int i = 0; i < n; i++) // imprime as linhas do meio
+    {
+        printf("%d ", 1 + i);
+
+        printf("┃");
+        for (int j = 0; j < n; j++)
+        {
+            if (matriz[i][j] == 0)
+            {
+                printf(" %*c ", tamanhoDaCelula, espaço);
+            }
+            else
+                printf(" %*d ", tamanhoDaCelula, matriz[i][j]); // o código < %*d > usa o argumento < tamanhoDaCelula - 2 > como tamanho da célula
+            printf("┃");
+        }
+        printf("\n");
+
+        if (i < n - 1) // verifica se a linha do meio deve ser impressa
+        {
+            printf("  ┣");
+            for (int j = 0; j < n; j++)
+            {
+                for (int k = 0; k < tamanhoDaCelula + 2; k++)
+                {
+                    printf("━");
+                }
+                if (j < n - 1) // verifica se a separação de celula deve ser escrita
+                {
+                    printf("╋");
+                }
+            }
+            printf("┫\n");
+        }
+    }
+
+    printf("  ┗"); // imprime a parte de baixo
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < tamanhoDaCelula + 2; j++)
+        {
+            printf("━");
+        }
+        if (i < n - 1)
+        {
+            printf("┻");
+        }
+    }
+    printf("┛\n");
+}
+
 void imprimeAjuda() // imprime o texto de ajuda no terminal
 {
     int resposta;
@@ -418,6 +565,15 @@ int derrotaOk()
     } while (resposta != 1);
 
     return resposta;
+}
+
+void pedeNomeArq(char nomeArq[30])
+{
+    printf("Digite o nome do arquivo desejado (sem a extensão .txt): ");
+    fgets(nomeArq, 30, stdin);
+    removeN(nomeArq);
+
+    strcat(nomeArq, ".txt");
 }
 
 // movimentação
@@ -785,9 +941,9 @@ int tamanhoCelula(int n, int **matriz) // define tamanho da célula
 
 // funções de arquivo
 
-void saveState(GameState *gameState) // salvar em arquivo saveState
+void saveState(GameState *gameState, char nomeArq[30]) // salvar em arquivo saveState
 {
-    FILE *arquivo = fopen("saveState.txt", "w");
+    FILE *arquivo = fopen(nomeArq, "w");
 
     fprintf(arquivo, "%d %d %d\n%d %s\n", gameState->tamanho, gameState->desfazer, gameState->trocar, gameState->pontuacao, gameState->nomeUser);
 
@@ -807,6 +963,34 @@ void imprimeMatrizArq(int tamanho, int **matriz, FILE *arquivo)
         }
         fprintf(arquivo, "\n");
     }
+}
+
+void leMatrizArq(int tamanho, int **matriz, FILE *arquivo)
+{
+    for (int i = 0; i < tamanho; i++)
+    {
+        for (int j = 0; j < tamanho; j++)
+        {
+            fscanf(arquivo, "%d ", &matriz[i][j]);
+        }
+        fscanf(arquivo, "\n");
+    }
+}
+
+void leArquivo(GameState *gameState, char nomeArq[30])
+{
+    FILE *arquivo = fopen(nomeArq, "r");
+
+    fscanf(arquivo, "%d %d %d %d", &gameState->tamanho, &gameState->desfazer, &gameState->trocar, &gameState->pontuacao);
+    fscanf(arquivo, "%s", gameState->nomeUser);
+
+    gameState->matrizAtual = criaMatriz(gameState->tamanho);
+    gameState->matrizAnterior = criaMatriz(gameState->tamanho);
+
+    leMatrizArq(gameState->tamanho, gameState->matrizAtual, arquivo);
+    leMatrizArq(gameState->tamanho, gameState->matrizAnterior, arquivo);
+
+    fclose(arquivo);
 }
 
 // funções utilitárias
@@ -833,7 +1017,7 @@ void toLow(char *letra)
 
 // pedir info de usuário, criar aquivo com o nome que o usuário decidir
 //  função
-// saveState(char nomeArq, int tamMatriz,int desfazer,int trocar, int pontuação, int nomeUser, int **matrizAtual, int **matrizAnterior); transformar info em struct
+// saveState(char nomeArq, inttamMatriz,int desfazer,int trocar, int pontuação, int nomeUser, int **matrizAtual, int **matrizAnterior); transformar info em struct
 /*Formato do arquivo
 Formato do arquivo texto:
 
