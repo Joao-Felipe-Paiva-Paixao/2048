@@ -1,35 +1,32 @@
-#include "2048.h" // Incluindo biblioteca do jogo
+#include "2048.h" // incluindo biblioteca do jogo
 
 int main()
 {
     char escolha, confirmacao;
-    int ajudaOk;
 
     do
     {
         imprimeMenu();               // imprime o menu de decisão
         escolha = verificaEntrada(); // lê e valida a entrada de um único caractere do usuário
+        toLow(&escolha);             // transforma a entrada em uma letra minuscula
 
         switch (escolha)
         {
         case 'r': // o programa deve encerrar
-        case 'R':
         {
             do
             {
                 printf("Deseja mesmo sair?(Digite [S] ou [N]):");
                 confirmacao = verificaEntrada();
+                toLow(&confirmacao);
 
                 switch (confirmacao)
                 {
                 case 's':
-                case 'S':
                     printf("Encerrando sessão, obrigado por jogar!!\n");
                     return 0;
-                    break;
 
                 case 'n':
-                case 'N':
                     printf("Voltando ao menu...\n");
                     break;
 
@@ -43,44 +40,43 @@ int main()
             break;
         }
         case 'n': // cria um novo jogo
-        case 'N':
         {
             novoJogo();
             break;
         }
         case 'j':
-        case 'J':
-            printf("Chegou\n");
-            break;
-        case 'c':
-        case 'C':
-            printf("Chegou\n");
-            break;
-        case 's':
-        case 'S':
-            printf("Chegou\n");
-            break;
-        case 'm':
-        case 'M':
-            printf("Chegou\n");
-            break;
-        case 'a':
-        case 'A': // mostra o texto de ajuda
         {
-            do
-            {
-                ajudaOk = imprimeAjuda(ajudaOk);
-            } while (ajudaOk != 1);
-            limpar_buffer();
-
+            printf("Chegou\n");
             break;
+        }
+        case 'c':
+        {
+            printf("Chegou\n");
+            break;
+        }
+        case 's':
+        {
+            printf("Chegou\n");
+            break;
+        }
+        case 'm':
+        {
+            printf("Chegou\n");
+            break;
+        }
+        case 'a': // mostra o texto de ajuda
+        {
+            imprimeAjuda();
+            break;
+        }
         default:
+        {
             if (escolha != '`')
                 printf("Resposta inválida!! tente novamente\n\n");
             break;
         }
         }
-    } while (escolha != 'r' && escolha != 'R');
+    } while (escolha != 'r');
 
     return 0;
 }

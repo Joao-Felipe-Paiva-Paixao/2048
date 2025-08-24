@@ -33,21 +33,17 @@ void emJogo(GameState *gameState) // função de jogo
     char jogada[20], jogadaChar;
     int **matrizAux = criaMatriz(gameState->tamanho); // matriz auxiliar
 
+    int pontuacaoAnterior = gameState->pontuacao;
+    int desfazerAnterior = gameState->desfazer;
+    int trocarAnterior = gameState->trocar;
+
     do // loop principal
     {
-        for (int i = 0; i < gameState->tamanho; i++)
-        {
-            for (int j = 0; j < gameState->tamanho; j++)
-            {
-                matrizAux[i][j] = gameState->matrizAtual[i][j];
-                gameState->matrizAnterior[i][j] = gameState->matrizAtual[i][j];
-            }
-        }
-
         imprimeTabuleiro(gameState->tamanho, gameState->matrizAtual, gameState->pontuacao);
 
         fgets(jogada, 20, stdin);
         removeN(jogada);
+        toLow(jogada);
 
         if (strcmp(jogada, "voltar") == 0) // compara duas strings e retorna 0 se forem iguais
         {
@@ -55,34 +51,69 @@ void emJogo(GameState *gameState) // função de jogo
             voltarMenu = 1;
             continue;
         }
+
+        else if (jogada[0] == 't' && jogada[1] == ' ')
+        {
+            if (gameState->trocar > 0)
+            {
+                char coordenada1[3], coordenada2[3]; // variaveis pra guardar as coordenadas digitadas pelo usuário
+                int linha1, col1, linha2, col2;
+
+                if (sscanf(jogada, "t %2s %2s", coordenada1, coordenada2) == 2) // a função sscanf lê uma string e verifica formato do comando
+                {
+                    char letraCol1 = coordenada1[0];
+                    char letraCol2 = coordenada2[0];
+
+                    toLow(&letraCol1);
+                    toLow(&letraCol2);
+
+                    col1 = letraCol1 - 'a'; // cálculo dos indices usando a tabela ascii
+                    linha1 = coordenada1[1] - '1';
+
+                    col2 = letraCol2 - 'a'; // cálculo dos indices usando a tabela ascii
+                    linha2 = coordenada2[1] - '1';
+
+                    if (linha1 >= 0 && linha1 < gameState->tamanho && col1 >= 0 && col1 < gameState->tamanho &&
+                        linha2 >= 0 && linha2 < gameState->tamanho && col2 >= 0 && col2 < gameState->tamanho) // verifica se as coordenadas são válidas
+                    {
+                        if (gameState->matrizAtual[linha1][col1] != 0 && gameState->matrizAtual[linha2][col2] != 0) // verifica se alguma das células está vazia
+                        {
+                            int aux = gameState->matrizAtual[linha1][col1]; // variavel auxiliar
+                            gameState->matrizAtual[linha1][col1] = gameState->matrizAtual[linha2][col2];
+                            gameState->matrizAtual[linha2][col2] = aux;
+
+                            gameState->trocar--; // remove um crédito
+                        }
+
+                        else
+                        {
+                            printf("Não é possível trocar uma célula vazia!\n");
+                        }
+                    }
+                    else
+                    {
+                        printf("Coordenadas inválidas! Ex: 't a1 c3'\n");
+                    }
+                }
+                else
+                {
+                    printf("Formato do comando inválido! Use: t <pos1> <pos2>\n");
+                }
+            }
+            else
+            {
+                printf("Você não tem chances para trocar peças!\n");
+            }
+            continue; // a troca não deve gerar uma nova peça no tabuleiro então pulamos o resto da iteração
+        }
+
         else if (strlen(jogada) == 1)
         {
             jogadaChar = jogada[0];
 
-            switch (jogadaChar)
+            if (jogadaChar == 'u')
             {
-            case 'd':
-                gameState->pontuacao += movimentacaoDireita(gameState->tamanho, gameState->matrizAtual, &gameState->desfazer);
-                movimentoDesfeito = 0;
-                break;
-
-            case 'a':
-                gameState->pontuacao += movimentacaoEsquerda(gameState->tamanho, gameState->matrizAtual, &gameState->desfazer);
-                movimentoDesfeito = 0;
-                break;
-
-            case 'w':
-                gameState->pontuacao += movimentacaoCima(gameState->tamanho, gameState->matrizAtual, &gameState->desfazer);
-                movimentoDesfeito = 0;
-                break;
-
-            case 's':
-                gameState->pontuacao += movimentacaoBaixo(gameState->tamanho, gameState->matrizAtual, &gameState->desfazer);
-                movimentoDesfeito = 0;
-                break;
-
-            case 'u':
-                if (!movimentoDesfeito && gameState->desfazer > 0) // o movimento é valido quando não foi feito na última jogada e o jogador tem um "credito"
+                if (!movimentoDesfeito && gameState->desfazer > 0)
                 {
                     for (int i = 0; i < gameState->tamanho; i++)
                     {
@@ -91,15 +122,53 @@ void emJogo(GameState *gameState) // função de jogo
                             gameState->matrizAtual[i][j] = gameState->matrizAnterior[i][j];
                         }
                     }
+                    gameState->pontuacao = pontuacaoAnterior;
+                    gameState->desfazer = desfazerAnterior;
+                    gameState->trocar = trocarAnterior;
+
                     movimentoDesfeito = 1;
-                    gameState->desfazer--; // remove uma chance de desfazer movimento
+                    gameState->desfazer--;
                 }
                 else
                 {
                     printf("Você não pode desfazer o movimento!!\n");
                 }
-
                 continue;
+            }
+
+            pontuacaoAnterior = gameState->pontuacao;
+            desfazerAnterior = gameState->desfazer;
+            trocarAnterior = gameState->trocar;
+            for (int i = 0; i < gameState->tamanho; i++)
+            {
+                for (int j = 0; j < gameState->tamanho; j++)
+                {
+                    matrizAux[i][j] = gameState->matrizAtual[i][j];
+                    gameState->matrizAnterior[i][j] = gameState->matrizAtual[i][j];
+                }
+            }
+
+            switch (jogadaChar)
+            {
+            case 'd':
+                gameState->pontuacao += movimentacaoDireita(gameState->tamanho, gameState->matrizAtual, &gameState->desfazer, &gameState->trocar);
+                movimentoDesfeito = 0;
+                break;
+
+            case 'a':
+                gameState->pontuacao += movimentacaoEsquerda(gameState->tamanho, gameState->matrizAtual, &gameState->desfazer, &gameState->trocar);
+                movimentoDesfeito = 0;
+                break;
+
+            case 'w':
+                gameState->pontuacao += movimentacaoCima(gameState->tamanho, gameState->matrizAtual, &gameState->desfazer, &gameState->trocar);
+                movimentoDesfeito = 0;
+                break;
+
+            case 's':
+                gameState->pontuacao += movimentacaoBaixo(gameState->tamanho, gameState->matrizAtual, &gameState->desfazer, &gameState->trocar);
+                movimentoDesfeito = 0;
+                break;
 
             default:
                 printf("Jogada inválida tente novamente: ");
@@ -244,8 +313,10 @@ void imprimeTabuleiro(int n, int **matriz, int pontuação) // imprime o tabulei
     printf("Jogada: ");
 }
 
-int imprimeAjuda(int ajudaOk) // imprime o texto de ajuda no terminal
+void imprimeAjuda() // imprime o texto de ajuda no terminal
 {
+    int resposta;
+
     printf("-----------AJUDA-----------\n");
     printf("O 2048 clássico é jogado em um tabuleiro de 4x4, com peças numéricas que deslizam suavemente quando o jogador as move em um dos quatro sentidos disponíveis: para cima, para baixo, à esquerda e à direita, a cada movimento, um novo número (com valor 2 ou 4) aparece aleatoriamente em um espaço vazio no tabuleiro. As peças (blocos) deslizam o mais longe possível na direção escolhida, até que sejam paradas por outra peça ou pela borda do tabuleiro. Se duas peças de mesmo número colidirem durante um movimento, elas se fundirão em uma única peça com o valor somado das duas que colidiram. A peça resultante não pode se fundir com outra peça na mesma jogada.\n");
     printf("-----------REGRAS-----------\n");
@@ -253,9 +324,15 @@ int imprimeAjuda(int ajudaOk) // imprime o texto de ajuda no terminal
     printf("-----------COMANDOS-----------\n");
     printf("- <w, a, s, d>: Movem as peças do tabuleiro para cima, esquerda, para baixo ou para direita, respectivamente.\n- <u>: Desfazer o  ́ultimo movimento.\n- <t pos1, pos2>: Trocar duas peças de posição, ou seja, troca o conteúdo da posição pos1 com o conteúdo da posição pos2.\n");
 
-    printf("\nDigite [1] pra voltar ao menu: ");
-    scanf("%d", &ajudaOk);
-    return ajudaOk;
+    do
+    {
+        scanf("%d", &resposta);
+        limpar_buffer();
+        if (resposta != 1)
+        {
+            printf("Resposta inválida! Por favor, digite [1] para voltar: ");
+        }
+    } while (resposta != 1);
 }
 
 char verificaEntrada() // lê e valida a entrada de um único caractere do usuário
@@ -345,7 +422,7 @@ int derrotaOk()
 
 // movimentação
 
-int movimentacaoEsquerda(int n, int **matriz, int *desfazer) // movimenta as peças no tabuleiro e retorna a pontuação da jogada
+int movimentacaoEsquerda(int n, int **matriz, int *desfazer, int *trocar) // movimenta as peças no tabuleiro e retorna a pontuação da jogada
 {
     int moveu;                       // variavel que mostra quando o movimento não é mais possivel
     int **matrizAux = criaMatriz(n); // criando matriz auxiliar
@@ -372,6 +449,11 @@ int movimentacaoEsquerda(int n, int **matriz, int *desfazer) // movimenta as pe�
                         (*desfazer)++;
                     }
 
+                    if (matriz[i][j] == 256) // verifica se o usuário deve receber um novo movimento de troca
+                    {
+                        (*trocar)++;
+                    }
+
                     matriz[i][j - 1] = (matriz[i][j]) * 2;
                     matriz[i][j] = 0;
                     pontuacao += matriz[i][j - 1];
@@ -389,7 +471,7 @@ int movimentacaoEsquerda(int n, int **matriz, int *desfazer) // movimenta as pe�
     return pontuacao;
 }
 
-int movimentacaoDireita(int n, int **matriz, int *desfazer) // movimenta as peças no tabuleiro e retorna a pontuação da jogada
+int movimentacaoDireita(int n, int **matriz, int *desfazer, int *trocar) // movimenta as peças no tabuleiro e retorna a pontuação da jogada
 {
     int moveu;                       // variavel que mostra quando o movimento não é mais possivel
     int **matrizAux = criaMatriz(n); // criando matriz auxiliar
@@ -417,6 +499,11 @@ int movimentacaoDireita(int n, int **matriz, int *desfazer) // movimenta as peç
                         (*desfazer)++;
                     }
 
+                    if (matriz[i][j] == 256) // verifica se o usuário deve receber um novo movimento de troca
+                    {
+                        (*trocar)++;
+                    }
+
                     matriz[i][j + 1] = (matriz[i][j]) * 2;
                     matriz[i][j] = 0;
                     pontuacao += matriz[i][j + 1];
@@ -434,7 +521,7 @@ int movimentacaoDireita(int n, int **matriz, int *desfazer) // movimenta as peç
     return pontuacao;
 }
 
-int movimentacaoCima(int n, int **matriz, int *desfazer) // movimenta as peças no tabuleiro e retorna a pontuação da jogada
+int movimentacaoCima(int n, int **matriz, int *desfazer, int *trocar) // movimenta as peças no tabuleiro e retorna a pontuação da jogada
 {
     int moveu;                       // variavel que mostra quando o movimento não é mais possivel
     int **matrizAux = criaMatriz(n); // criando matriz auxiliar
@@ -462,6 +549,11 @@ int movimentacaoCima(int n, int **matriz, int *desfazer) // movimenta as peças 
                         (*desfazer)++;
                     }
 
+                    if (matriz[i][j] == 256) // verifica se o usuário deve receber um novo movimento de troca
+                    {
+                        (*trocar)++;
+                    }
+
                     matriz[i - 1][j] = (matriz[i][j]) * 2;
                     matriz[i][j] = 0;
                     pontuacao += matriz[i - 1][j];
@@ -479,7 +571,7 @@ int movimentacaoCima(int n, int **matriz, int *desfazer) // movimenta as peças 
     return pontuacao;
 }
 
-int movimentacaoBaixo(int n, int **matriz, int *desfazer) // movimenta as peças no tabuleiro e retorna a pontuação da jogada
+int movimentacaoBaixo(int n, int **matriz, int *desfazer, int *trocar) // movimenta as peças no tabuleiro e retorna a pontuação da jogada
 {
     int moveu;                       // variavel que mostra quando o movimento não é mais possivel
     int **matrizAux = criaMatriz(n); // criando matriz auxiliar
@@ -505,6 +597,11 @@ int movimentacaoBaixo(int n, int **matriz, int *desfazer) // movimenta as peças
                     if (matriz[i][j] == 128) // verifica se o usuário deve receber um novo movimento de desfazer
                     {
                         (*desfazer)++;
+                    }
+
+                    if (matriz[i][j] == 256) // verifica se o usuário deve receber um novo movimento de troca
+                    {
+                        (*trocar)++;
                     }
 
                     matriz[i + 1][j] = (matriz[i][j]) * 2;
@@ -726,6 +823,14 @@ void removeN(char *nome)
     nome[strcspn(nome, "\n")] = '\0';
 }
 
+void toLow(char *letra)
+{
+    if (*letra >= 'A' && *letra <= 'Z')
+    {
+        *letra = *letra + 32;
+    }
+}
+
 // pedir info de usuário, criar aquivo com o nome que o usuário decidir
 //  função
 // saveState(char nomeArq, int tamMatriz,int desfazer,int trocar, int pontuação, int nomeUser, int **matrizAtual, int **matrizAnterior); transformar info em struct
@@ -750,6 +855,3 @@ INFO DE FORMATO ARQUIVO
 <MATRIZ_TABULEIRO_ULTIMA_JOGADA>: matriz de int com dimensão TAMANHO x TAMANHO, com os valores das células da última jogada. O valor 0 (zero) indica uma posição vazia*/
 
 // criar função em jogo, passar como parametros o tamanho e a matriz, save state a cada movimento
-
-// fazer função perdeuJogo
-// fazer a função pontuação e mostrar no final

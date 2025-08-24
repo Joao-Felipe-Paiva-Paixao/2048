@@ -25,17 +25,17 @@ void emJogo(GameState *gameState); // função de jogo
 // funções que interagem com o usuário
 void imprimeMenu();                                        // imprime o menu no terminal
 void imprimeTabuleiro(int n, int **matriz, int pontuação); // imprime o tabuleiro do jogo
-int imprimeAjuda(int ajudaOk);                             // imprime o texto de ajuda no terminal
+void imprimeAjuda();                                       // imprime o texto de ajuda no terminal
 char verificaEntrada();                                    // lê e valida a entrada de um único caractere do usuário
 int tamanhoTabuleiro();                                    // decide o tamanho do tabuleiro
 int vitoriaDecisao();                                      // usuário decide se continuará no jogo
 int derrotaOk();                                           // usuário responde após derrota
 
 // movimentação
-int movimentacaoEsquerda(int n, int **matriz, int *desfazer); // movimenta as peças no tabuleiro
-int movimentacaoDireita(int n, int **matriz, int *desfazer);  // movimenta as peças no tabuleiro
-int movimentacaoCima(int n, int **matriz, int *desfazer);     // movimenta as peças no tabuleiro
-int movimentacaoBaixo(int n, int **matriz, int *desfazer);    // movimenta as peças no tabuleiro
+int movimentacaoEsquerda(int n, int **matriz, int *desfazer, int *trocar); // movimenta as peças no tabuleiro
+int movimentacaoDireita(int n, int **matriz, int *desfazer, int *trocar);  // movimenta as peças no tabuleiro
+int movimentacaoCima(int n, int **matriz, int *desfazer, int *trocar);     // movimenta as peças no tabuleiro
+int movimentacaoBaixo(int n, int **matriz, int *desfazer, int *trocar);    // movimenta as peças no tabuleiro
 
 // verificações do gameState
 int confereMovimento(int n, int **matriz, int **matrizAux); // função que confere se houve movimento no tabuleiro do jogo
@@ -56,5 +56,6 @@ void imprimeMatrizArq(int tamanho, int **matriz, FILE *arquivo); // imprime matr
 // funções utilitárias
 void limpar_buffer();     // limpa o buffer
 void removeN(char *nome); // remove o \n no fim de uma string
+void toLow(char *letra);
 
 #endif
