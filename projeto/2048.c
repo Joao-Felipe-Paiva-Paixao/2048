@@ -28,29 +28,34 @@ void novoJogo() // corresponde a opção de novo jogo no menu
     liberaMatriz(gameState.matrizAnterior, gameState.tamanho);
 }
 
-void continuarJogo()
+void continuarJogo() // continua o último jogo
 {
     GameState gameState;
     char nomeArq[30];
     strcpy(nomeArq, "saveState.txt");
 
-    leArquivo(&gameState, nomeArq);
-
-    if (gameState.tamanho > 0)
+    if (leArquivo(&gameState, nomeArq))
     {
-        printf("\nContinuando o jogo de %s...\n", gameState.nomeUser);
-        emJogo(&gameState);
+        if (gameState.tamanho > 0)
+        {
+            printf("Continuando o jogo de %s...\n", gameState.nomeUser);
+            emJogo(&gameState);
 
-        liberaMatriz(gameState.matrizAtual, gameState.tamanho);
-        liberaMatriz(gameState.matrizAnterior, gameState.tamanho);
+            liberaMatriz(gameState.matrizAtual, gameState.tamanho);
+            liberaMatriz(gameState.matrizAnterior, gameState.tamanho);
+        }
+        else
+        {
+            printf("Erro ao ler arquivo!!\n");
+        }
     }
-    else
+    else // Se a leitura falhou (ficheiro não existe)
     {
-        printf("\nErro ao ler arquivo!!\n");
+        printf("Nenhum jogo em andamento para continuar!\n");
     }
 }
 
-void carregarJogo()
+void carregarJogo() // carrega jogo salvo
 {
     GameState gameState;
     char nomeArq[30];
@@ -72,7 +77,7 @@ void carregarJogo()
     }
 }
 
-void salvarJogo()
+void salvarJogo() // salva jogo em um arquivo
 {
     GameState gameState;
     char nomeArq[30];
@@ -87,7 +92,7 @@ void salvarJogo()
     // chamar função salvaRanking
 }
 
-void mostraRanking()
+void mostraRanking() // mostra o ranking de pontuações
 {
     int n4, n5, n6;
     FILE *arquivo = fopen("ranking.dat", "r");
@@ -131,6 +136,32 @@ void mostraRanking()
     fclose(arquivo);
 }
 
+int sairDoJogo() // fecha o programa a depender da confirmação do usuário
+{
+    char confirmacao;
+    do
+    {
+        printf("Deseja mesmo sair?(Digite [S] ou [N]):");
+        confirmacao = verificaEntrada();
+        toLow(&confirmacao);
+
+        if (confirmacao == 's')
+        {
+            printf("Encerrando sessão, obrigado por jogar!!\n");
+            return 1; // o programa deve encerrar
+        }
+        else if (confirmacao == 'n')
+        {
+            printf("Voltando ao menu...\n\n");
+            return 0; // o programa não deve encerrar
+        }
+        else
+        {
+            printf("Resposta inválida!! Tente novamente\n");
+        }
+    } while (1); // o loop continua até que 's' ou 'n' seja digitado
+}
+
 void emJogo(GameState *gameState) // função de jogo
 {
     int ganhou = 0;
@@ -145,7 +176,7 @@ void emJogo(GameState *gameState) // função de jogo
 
     do // loop principal
     {
-        imprimeTabuleiro(gameState->tamanho, gameState->matrizAtual, gameState->pontuacao);
+        imprimeTabuleiro(gameState->tamanho, gameState->matrizAtual, gameState->pontuacao, gameState->desfazer, gameState->trocar);
 
         fgets(jogada, 20, stdin);
         removeN(jogada);
@@ -314,11 +345,27 @@ void emJogo(GameState *gameState) // função de jogo
         if (verificaPerdeu(gameState->tamanho, gameState->matrizAtual))
         {
             imprimeTabuleiroFinal(gameState->tamanho, gameState->matrizAtual, gameState->pontuacao);
-            derrotaOk();
+            if (derrotaOk(gameState->desfazer))
+            {
+                for (int i = 0; i < gameState->tamanho; i++) // movimento de desfazer
+                {
+                    for (int j = 0; j < gameState->tamanho; j++)
+                    {
+                        gameState->matrizAtual[i][j] = gameState->matrizAnterior[i][j];
+                    }
+                }
+            }
+            gameState->pontuacao = pontuacaoAnterior;
+            gameState->desfazer = desfazerAnterior;
+            gameState->trocar = trocarAnterior;
+
+            gameState->desfazer--;
+            movimentoDesfeito = 1;
+        }
+        else
+        {
             voltarMenu = 1;
         }
-
-        // função saveState
     } while (!voltarMenu);
     escreveRanking(gameState);
 }
@@ -339,16 +386,16 @@ void imprimeMenu() // imprime o menu no terminal
     printf("\nDigite a sua resposta: ");
 }
 
-void imprimeTabuleiro(int n, int **matriz, int pontuação) // imprime o tabuleiro do jogo
+void imprimeTabuleiro(int n, int **matriz, int pontuação, int desfazer, int trocar) // imprime o tabuleiro do jogo
 {
     char espaço = ' ';
     int tamanhoDaCelula = tamanhoCelula(n, matriz);
 
-    printf("PONTUAÇÃO: %d\n", pontuação);
+    printf("PONTUAÇÃO: %d   DESFAZER: %d   TROCAR: %d\n", pontuação, desfazer, trocar);
     printf("   "); // letras
     for (int i = 0; i < n; i++)
     {
-        printf(" %*c ", tamanhoDaCelula, (char)97 + i);
+        printf(" %*c ", tamanhoDaCelula, 'A' + i);
 
         if (i < n - 1)
         {
@@ -516,6 +563,7 @@ void imprimeAjuda() // imprime o texto de ajuda no terminal
     printf("-----------COMANDOS-----------\n");
     printf("- <w, a, s, d>: Movem as peças do tabuleiro para cima, esquerda, para baixo ou para direita, respectivamente.\n- <u>: Desfazer o  ́ultimo movimento.\n- <t pos1, pos2>: Trocar duas peças de posição, ou seja, troca o conteúdo da posição pos1 com o conteúdo da posição pos2.\n");
 
+    printf("Digite [1] pra voltar ao menu: ");
     do
     {
         scanf("%d", &resposta);
@@ -572,7 +620,7 @@ int tamanhoTabuleiro() // decide o tamanho do tabuleiro
     return n;
 }
 
-int vitoriaDecisao()
+int vitoriaDecisao() // usuário decide se continuará no jogo
 {
     int decisao;
     printf("Parabéns você conseguiu chegar a 2048!!\nVocê quer continuar jogando?\nDigite [1] pra continuar jogando e [0] pra voltar ao menu: ");
@@ -592,27 +640,45 @@ int vitoriaDecisao()
     return decisao;
 }
 
-int derrotaOk()
+int derrotaOk(int desfazer) // usuário responde após derrota
 {
     int resposta;
-    printf("Que pena!! Infelizmente você perdeu, para voltar ao menu digite [1]: ");
-    scanf("%d", &resposta);
-    limpar_buffer();
+    printf("Que pena!! Infelizmente você perdeu!\n");
 
-    do
+    if (desfazer > 0) // se o jogador tiver chances de desfazer
     {
-        if (resposta != 1)
+        printf("Você tem %d chance(s) de desfazer. Deseja usar uma?\n", desfazer);
+        printf("Digite [1] para desfazer ou [0] para voltar ao menu: ");
+        do
         {
-            printf("Resposta inválida!! Por favor digite novamente: ");
             scanf("%d", &resposta);
             limpar_buffer();
-        }
-    } while (resposta != 1);
+            if (resposta != 1 && resposta != 0)
+            {
+                printf("Resposta inválida! Por favor, digite [1] ou [0]: ");
+            }
+        } while (resposta != 1 && resposta != 0);
 
-    return resposta;
+        return resposta; // retorna 1 caso o usuário queira desfazer o movimento
+    }
+    else
+    {
+        printf("Que pena!! Para voltar ao menu digite [1]: ");
+        do
+        {
+            scanf("%d", &resposta);
+            limpar_buffer();
+            if (resposta != 1)
+            {
+                printf("Resposta inválida!! Por favor, digite [1] para voltar: ");
+            }
+        } while (resposta != 1);
+
+        return 0; // volta pro menu
+    }
 }
 
-void pedeNomeArq(char nomeArq[30])
+void pedeNomeArq(char nomeArq[30]) // pede nome do arquivo, pra slavar ou carregar jogo
 {
     printf("Digite o nome do arquivo desejado (sem a extensão .txt): ");
     fgets(nomeArq, 30, stdin);
@@ -838,7 +904,7 @@ int confereMovimento(int n, int **matriz, int **matrizAux) // função que confe
     return 0;
 }
 
-int verificaGanhou(int tamanho, int **matriz)
+int verificaGanhou(int tamanho, int **matriz) // verifica se alguma célula do tabuleiro é 2048
 {
     for (int i = 0; i < tamanho; i++)
     {
@@ -854,7 +920,7 @@ int verificaGanhou(int tamanho, int **matriz)
     return 0;
 }
 
-int verificaPerdeu(int tamanho, int **matriz)
+int verificaPerdeu(int tamanho, int **matriz) // verifica se há movimento válido
 {
     for (int i = 0; i < tamanho; i++)
     {
@@ -996,7 +1062,7 @@ void saveState(GameState *gameState, char nomeArq[30]) // salvar em arquivo save
     fclose(arquivo);
 }
 
-void imprimeMatrizArq(int tamanho, int **matriz, FILE *arquivo)
+void imprimeMatrizArq(int tamanho, int **matriz, FILE *arquivo) // imprime matriz de jogo em arquivo
 {
     for (int i = 0; i < tamanho; i++)
     {
@@ -1008,7 +1074,7 @@ void imprimeMatrizArq(int tamanho, int **matriz, FILE *arquivo)
     }
 }
 
-void leMatrizArq(int tamanho, int **matriz, FILE *arquivo)
+void leMatrizArq(int tamanho, int **matriz, FILE *arquivo) // lê uma matriz de um arquivo txt
 {
     for (int i = 0; i < tamanho; i++)
     {
@@ -1020,9 +1086,14 @@ void leMatrizArq(int tamanho, int **matriz, FILE *arquivo)
     }
 }
 
-void leArquivo(GameState *gameState, char nomeArq[30])
+int leArquivo(GameState *gameState, char nomeArq[30]) // lê info de jogo de um arquivo txt
 {
     FILE *arquivo = fopen(nomeArq, "r");
+
+    if (arquivo == NULL)
+    {
+        return 0; // se o arquivo não existir
+    }
 
     fscanf(arquivo, "%d %d %d %d", &gameState->tamanho, &gameState->desfazer, &gameState->trocar, &gameState->pontuacao);
     fscanf(arquivo, "%s", gameState->nomeUser);
@@ -1034,9 +1105,10 @@ void leArquivo(GameState *gameState, char nomeArq[30])
     leMatrizArq(gameState->tamanho, gameState->matrizAnterior, arquivo);
 
     fclose(arquivo);
+    return 1; // se a leitura for bem sucedida
 }
 
-void escreveRanking(GameState *gameState)
+void escreveRanking(GameState *gameState) // escreve ranking em um arquivo dat
 {
     Ranking rank4[11], rank5[11], rank6[11];
     int n4 = 0, n5 = 0, n6 = 0;
@@ -1131,40 +1203,15 @@ void limpar_buffer() // limpa o buffer
         ;
 }
 
-void removeN(char *nome)
+void removeN(char *nome) // remove o \n no fim de uma string
 {
     nome[strcspn(nome, "\n")] = '\0';
 }
 
-void toLow(char *letra)
+void toLow(char *letra) // transforma todas as letras de uma string em minusculas
 {
     if (*letra >= 'A' && *letra <= 'Z')
     {
         *letra = *letra + 32;
     }
 }
-
-// pedir info de usuário, criar aquivo com o nome que o usuário decidir
-//  função
-// saveState(char nomeArq, inttamMatriz,int desfazer,int trocar, int pontuação, int nomeUser, int **matrizAtual, int **matrizAnterior); transformar info em struct
-/*Formato do arquivo
-Formato do arquivo texto:
-
-<TAMANHO> <NDESFAZER> <NTROCAR>
-<PONTUAÇÃO> <NOME>
-<MATRIZ_TABULEIRO_ATUAL>
-<MATRIZ_TABULEIRO_ULTIMA_JOGADA>
-
-Onde:
-
-INFO DE FORMATO ARQUIVO
-
-<TAMANHO>: É um número inteiro (4, 5 ou 6) indicando o tamanho do tabuleiro;
-<NDESFAZER>: número jogadas "desfazer" disponíveis (int)
-<NTROCAR>: número jogadas "trocar" disponíveis (int)
-<PONTUAÇÃO>: pontuação do jogador (int)
-<NOME>: string de 27 posições que armazena o nome do jogador
-<MATRIZ_TABULEIRO_ATUAL>: matriz de int com dimensão TAMANHO x TAMANHO, com os valores das células do jogo atual. O valor 0 (zero) indica uma posição vazia
-<MATRIZ_TABULEIRO_ULTIMA_JOGADA>: matriz de int com dimensão TAMANHO x TAMANHO, com os valores das células da última jogada. O valor 0 (zero) indica uma posição vazia*/
-
-// criar função em jogo, passar como parametros o tamanho e a matriz, save state a cada movimento

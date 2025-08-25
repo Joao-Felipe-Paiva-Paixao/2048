@@ -20,29 +20,9 @@ int main()
         {
         case 'r': // o programa deve encerrar
         {
-            do
-            {
-                printf("Deseja mesmo sair?(Digite [S] ou [N]):");
-                confirmacao = verificaEntrada();
-                toLow(&confirmacao);
-
-                switch (confirmacao)
-                {
-                case 's':
-                    printf("Encerrando sessão, obrigado por jogar!!\n");
-                    return 0;
-
-                case 'n':
-                    printf("Voltando ao menu...\n");
-                    break;
-
-                default:
-                    printf("Resposta inválida!!Tente novamente\n");
-                    confirmacao = '`';
-                    break;
-                }
-            } while (confirmacao == '`');
-            escolha = '`';
+            if (sairDoJogo())
+                remove("saveState.txt"); // apaga o arquivo saveState.txt
+            return 0;
             break;
         }
         case 'n': // cria um novo jogo
@@ -82,7 +62,7 @@ int main()
             break;
         }
         }
-    } while (escolha != 'r');
+    } while (1);
 
     return 0;
 }

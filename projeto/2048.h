@@ -34,17 +34,18 @@ void continuarJogo();              // continua o último jogo
 void carregarJogo();               // carrega jogo salvo
 void salvarJogo();                 // salva jogo em um arquivo
 void mostraRanking();              // mostra o ranking de pontuações
+int sairDoJogo();                  // fecha o programa a depender da confirmação do usuário
 
 // funções que interagem com o usuário
-void imprimeMenu();                                             // imprime o menu no terminal
-void imprimeTabuleiro(int n, int **matriz, int pontuação);      // imprime o tabuleiro do jogo
-void imprimeTabuleiroFinal(int n, int **matriz, int pontuação); // imprime o tabuleiro do jogo quando o usuário perde
-void imprimeAjuda();                                            // imprime o texto de ajuda no terminal
-char verificaEntrada();                                         // lê e valida a entrada de um único caractere do usuário
-int tamanhoTabuleiro();                                         // decide o tamanho do tabuleiro
-int vitoriaDecisao();                                           // usuário decide se continuará no jogo
-int derrotaOk();                                                // usuário responde após derrota
-void pedeNomeArq(char nomeArq[30]);
+void imprimeMenu();                                                                  // imprime o menu no terminal
+void imprimeTabuleiro(int n, int **matriz, int pontuação, int desfazer, int trocar); // imprime o tabuleiro do jogo
+void imprimeTabuleiroFinal(int n, int **matriz, int pontuação);                      // imprime o tabuleiro do jogo quando o usuário perde
+void imprimeAjuda();                                                                 // imprime o texto de ajuda no terminal
+char verificaEntrada();                                                              // lê e valida a entrada de um único caractere do usuário
+int tamanhoTabuleiro();                                                              // decide o tamanho do tabuleiro
+int vitoriaDecisao();                                                                // usuário decide se continuará no jogo
+int derrotaOk(int desfazer);                                                         // usuário responde após derrota
+void pedeNomeArq(char nomeArq[30]);                                                  // pede nome do arquivo, pra slavar ou carregar jogo
 
 // movimentação
 int movimentacaoEsquerda(int n, int **matriz, int *desfazer, int *trocar); // movimenta as peças no tabuleiro
@@ -67,13 +68,13 @@ int tamanhoCelula(int n, int **matriz);        // define tamanho da célula
 // funções de arquivo
 void saveState(GameState *gameState, char nomeArq[30]);          // salvar em arquivo saveState
 void imprimeMatrizArq(int tamanho, int **matriz, FILE *arquivo); // imprime matriz de jogo em arquivo
-void leMatrizArq(int tamanho, int **matriz, FILE *arquivo);
-void leArquivo(GameState *gameState, char nomeArq[30]);
-void escreveRanking(GameState *gameState);
+void leMatrizArq(int tamanho, int **matriz, FILE *arquivo);      // lê uma matriz de um arquivo txt
+int leArquivo(GameState *gameState, char nomeArq[30]);           // lê info de jogo de um arquivo txt
+void escreveRanking(GameState *gameState);                       // escreve ranking em um arquivo dat
 
 // funções utilitárias
 void limpar_buffer();     // limpa o buffer
 void removeN(char *nome); // remove o \n no fim de uma string
-void toLow(char *letra);
+void toLow(char *letra);  // transforma todas as letras de uma string em minusculas
 
 #endif
