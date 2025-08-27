@@ -354,17 +354,18 @@ void emJogo(GameState *gameState) // função de jogo
                         gameState->matrizAtual[i][j] = gameState->matrizAnterior[i][j];
                     }
                 }
-            }
-            gameState->pontuacao = pontuacaoAnterior;
-            gameState->desfazer = desfazerAnterior;
-            gameState->trocar = trocarAnterior;
 
-            gameState->desfazer--;
-            movimentoDesfeito = 1;
-        }
-        else
-        {
-            voltarMenu = 1;
+                gameState->pontuacao = pontuacaoAnterior;
+                gameState->desfazer = desfazerAnterior;
+                gameState->trocar = trocarAnterior;
+
+                gameState->desfazer--;
+                movimentoDesfeito = 1;
+            }
+            else
+            {
+                voltarMenu = 1;
+            }
         }
     } while (!voltarMenu);
     escreveRanking(gameState);
